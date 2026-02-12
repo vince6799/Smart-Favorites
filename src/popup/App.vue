@@ -147,7 +147,7 @@
       :initial-category-id="selectedCategoryId || undefined"
       @submit="handleBookmarkSubmit"
     />
-    <TagManager v-model="showTagManager" />
+    <TagManager v-if="showTagManager" v-model="showTagManager" />
     <CategoryEditDialog
       v-model="showCategoryEdit"
       :category="editingCategory"

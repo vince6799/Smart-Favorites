@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import type { Tag } from '@/types'
@@ -161,6 +161,13 @@ const handleDeleteTag = async (id: string, name: string) => {
 // 初始化
 onMounted(() => {
   loadTags()
+})
+
+// 监听打开动作，确保数据实时刷新
+watch(() => props.modelValue, (val) => {
+  if (val) {
+    loadTags()
+  }
 })
 </script>
 

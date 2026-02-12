@@ -39,11 +39,14 @@ export class StorageService {
      * 保存数据
      */
     async setData(data: StorageData): Promise<void> {
+        // 使用深度克隆确保数据是纯粹的 JSON 格式，不受 Vue 3 响应式代理（Proxy）影响
+        const cleanData = JSON.parse(JSON.stringify({
+            ...data,
+            version: '1.0.0'
+        }))
+
         await chrome.storage.local.set({
-            [this.STORAGE_KEY]: {
-                ...data,
-                version: '1.0.0',
-            }
+            [this.STORAGE_KEY]: cleanData
         })
     }
 
@@ -141,6 +144,12 @@ export class StorageService {
             updatedAt: Date.now()
         }
         data.bookmarks.push(newBookmark)
+
+        // 自动注册新标签
+        if (newBookmark.tags && newBookmark.tags.length > 0) {
+            this.ensureTagsExist(data, newBookmark.tags)
+        }
+
         await this.setData(data)
         return newBookmark
     }
@@ -157,6 +166,12 @@ export class StorageService {
                 ...updates,
                 updatedAt: Date.now()
             }
+
+            // 自动注册新标签
+            if (updates.tags && updates.tags.length > 0) {
+                this.ensureTagsExist(data, updates.tags)
+            }
+
             await this.setData(data)
         }
     }
@@ -489,6 +504,36 @@ export class StorageService {
             console.error('导入失败:', error)
             throw new Error('JSON格式不正确')
         }
+    }
+
+    /**
+     * 确保标签存在于全局列表中
+     */
+    private ensureTagsExist(data: StorageData, tagNames: string[]): void {
+        const existingTags = data.tags.map(t => t.name)
+        tagNames.forEach(name => {
+            if (name && !existingTags.includes(name)) {
+                data.tags.push({
+                    id: generateId(),
+                    name: name,
+                    color: this.getRandomTagColor(),
+                    count: 0,
+                    createdAt: Date.now()
+                })
+            }
+        })
+    }
+
+    /**
+     * 获取随机标签颜色
+     */
+    private getRandomTagColor(): string {
+        const colors = [
+            '#409EFF', '#67C23A', '#E6A23C', '#F56C6C',
+            '#909399', '#ff6b6b', '#4ecdc4', '#45b7d1',
+            '#96ceb4', '#ffeaa7', '#dfe6e9', '#a29bfe'
+        ]
+        return colors[Math.floor(Math.random() * colors.length)]
     }
 
     /**
