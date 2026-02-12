@@ -113,6 +113,10 @@
                       <el-icon><Document /></el-icon>
                       导出为JSON
                     </el-dropdown-item>
+                    <el-dropdown-item command="export-html">
+                      <el-icon><Document /></el-icon>
+                      导出为HTML
+                    </el-dropdown-item>
                     <el-dropdown-item command="import-json">
                       <el-icon><FolderOpened /></el-icon>
                       从JSON导入
@@ -428,6 +432,18 @@ const handleImportExport = async (command: string) => {
         a.href = url
         a.download = `bookmarks-${Date.now()}.json`
         a.click()
+        ElMessage.success('导出成功')
+        break
+
+      case 'export-html':
+        const html = await storageService.exportToHTML()
+        const htmlBlob = new Blob([html], { type: 'text/html' })
+        const htmlUrl = URL.createObjectURL(htmlBlob)
+        const htmlA = document.createElement('a')
+        htmlA.href = htmlUrl
+        htmlA.download = `bookmarks-${Date.now()}.html`
+        htmlA.click()
+        URL.revokeObjectURL(htmlUrl)
         ElMessage.success('导出成功')
         break
 

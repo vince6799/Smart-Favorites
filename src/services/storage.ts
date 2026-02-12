@@ -284,6 +284,194 @@ export class StorageService {
     }
 
     /**
+     * 导出为 HTML (Netscape 格式)
+     */
+    async exportToHTML(): Promise<string> {
+        const data = await this.getData();
+        const { categories, bookmarks } = data;
+
+        // 检查分类（及其所有子分类）是否包含书签
+        const hasBookmarksCheck = (categoryId: string): boolean => {
+            if (bookmarks.some(b => b.categoryId === categoryId)) return true;
+            const subCats = categories.filter(c => c.parentId === categoryId);
+            return subCats.some(sc => hasBookmarksCheck(sc.id));
+        };
+
+        // 构建分类树内容
+        const buildTreeHtml = (parentId: string | null, level: number): string => {
+            const indent = '    '.repeat(level);
+            // 获取该分类下的子分类
+            const subCategories = categories
+                .filter(c => c.parentId === parentId)
+                .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            // 获取该分类下的书签
+            const categoryBookmarks = bookmarks
+                .filter(b => b.categoryId === parentId)
+                .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            let html = '';
+
+            // 导出分类下的书签
+            for (const b of categoryBookmarks) {
+                const addDate = Math.floor((b.createdAt || Date.now()) / 1000);
+                const tagsCsv = b.tags ? b.tags.join(',') : '';
+                // 写入 DT/A 标签，包含 URL, 创建时间, 标签和图标
+                html += `${indent}<DT><A HREF="${b.url}" ADD_DATE="${addDate}" TAGS="${tagsCsv}" ICON="${b.favicon || ''}">${b.title}</A>\n`;
+                if (b.description) {
+                    html += `${indent}<DD>${b.description}\n`;
+                }
+            }
+
+            // 递归导出子分类
+            for (const cat of subCategories) {
+                // 如果该分类及其子分类没有任何书签，则跳过
+                if (!hasBookmarksCheck(cat.id)) continue;
+
+                const addDate = Math.floor((cat.createdAt || Date.now()) / 1000);
+                html += `${indent}<DT><H3 ADD_DATE="${addDate}" LAST_MODIFIED="${addDate}">${cat.name}</H3>\n`;
+                html += `${indent}<DL><p>\n`;
+                html += buildTreeHtml(cat.id, level + 1);
+                html += `${indent}</DL><p>\n`;
+            }
+
+            return html;
+        };
+
+        const htmlContent = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     It will be read and classified.
+     DO NOT EDIT! -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>智能收藏夹 - 书签导出</TITLE>
+<style>
+    :root {
+        --color-primary: #409EFF;
+        --color-text: #303133;
+        --color-text-light: #909399;
+        --color-bg: #f5f7fa;
+        --color-border: #e4e7ed;
+        --color-card: #ffffff;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        margin: 0;
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--color-card);
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+        font-size: 28px;
+        margin-top: 0;
+        margin-bottom: 40px;
+        color: var(--color-primary);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    h1::before {
+        content: "🔖";
+    }
+    dl {
+        margin: 0;
+        padding-left: 24px;
+        border-left: 2px solid var(--color-bg);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    .collapsed + dl {
+        display: none;
+    }
+    dt {
+        margin: 12px 0;
+        list-style: none;
+    }
+    h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 32px 0 16px -24px;
+        padding: 8px 16px;
+        background: var(--color-bg);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
+    }
+    h3:hover {
+        background: var(--color-border);
+    }
+    h3::before {
+        content: "▼";
+        font-size: 12px;
+        transition: transform 0.2s;
+    }
+    h3.collapsed::before {
+        transform: rotate(-90deg);
+    }
+    h3::after {
+        content: "📁";
+        margin-left: 4px;
+    }
+    a {
+        text-decoration: none;
+        color: var(--color-text);
+        font-weight: 500;
+        transition: color 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    a:hover {
+        color: var(--color-primary);
+    }
+    dd {
+        font-size: 13px;
+        color: var(--color-text-light);
+        margin: -8px 0 16px 24px;
+    }
+    .footer {
+        margin-top: 60px;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-border);
+        font-size: 12px;
+        color: var(--color-text-light);
+        text-align: center;
+    }
+</style>
+<div class="container">
+    <H1>智能收藏夹</H1>
+    <DL><p>
+    ${buildTreeHtml(null, 1)}
+    </DL><p>
+    <div class="footer">
+        导出于 ${new Date().toLocaleString()} - 由智能收藏夹插件生成
+    </div>
+</div>
+<script>
+    document.querySelectorAll('h3').forEach(header => {
+        header.addEventListener('click', () => {
+            header.classList.toggle('collapsed');
+        });
+    });
+</script>
+`;
+
+        return htmlContent;
+    }
+
+    /**
      * 从JSON导入数据
      */
     async importFromJSON(jsonStr: string): Promise<void> {
