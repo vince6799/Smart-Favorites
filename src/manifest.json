@@ -24,8 +24,9 @@
         "storage",
         "bookmarks",
         "contextMenus",
-        "tabs",
-        "notifications"
+        "notifications",
+        "activeTab",
+        "scripting"
     ],
     "commands": {
         "_execute_action": {
@@ -42,9 +43,5 @@
             },
             "description": "快速搜索"
         }
-    },
-    "host_permissions": [
-        "http://*/*",
-        "https://*/*"
-    ]
+    }
 }
