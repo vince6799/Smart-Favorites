@@ -48,10 +48,16 @@ npm run build
 
 ## 📦 安装扩展
 
+### 开发模式
+
 1. 打开Chrome浏览器，访问 `chrome://extensions/`
 2. 开启右上角的"开发者模式"
 3. 点击"加载已解压的扩展程序"
 4. 选择项目的 `dist` 目录
+
+### 从Chrome 应用商店安装
+
+ - [Chrome 应用商店](https://chromewebstore.google.com/detail/%E6%99%BA%E8%83%BD%E6%94%B6%E8%97%8F%E5%A4%B9/igpenlimhjaeobfjmljakadodcppfala)
 
 ## 🎯 使用指南
 
