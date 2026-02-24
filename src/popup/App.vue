@@ -43,9 +43,25 @@
             <el-tooltip :content="t('app.tagManager')">
               <el-button :icon="PriceTag" circle @click="showTagManager = true" />
             </el-tooltip>
-            <el-tooltip :content="t('app.settings')">
-              <el-button :icon="Setting" circle @click="showSettings = true" />
-            </el-tooltip>
+            <el-dropdown @command="handleSettingsCommand" trigger="click">
+              <el-button :icon="Setting" circle />
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="system">
+                    <el-icon><Setting /></el-icon>
+                    {{ t('settings.systemConfig') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="shortcuts">
+                    <el-icon><Monitor /></el-icon>
+                    {{ t('settings.shortcuts.title') }}
+                  </el-dropdown-item>
+                  <el-dropdown-item command="backup">
+                    <el-icon><Refresh /></el-icon>
+                    {{ t('settings.autoBackup') }}
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </div>
 
@@ -143,7 +159,11 @@
       </template>
 
       <!-- 对话框 -->
-      <SettingsDialog v-model="showSettings" />
+      <SettingsDialog 
+        v-model="showSettings" 
+        @open-shortcuts="showShortcuts = true"
+        @open-backup="showBackup = true"
+      />
       <BookmarkEditDialog
         v-model="showBookmarkEdit"
         :bookmark="editingBookmark"
@@ -166,6 +186,8 @@
         @delete="handleDeleteBookmark"
         @open="handleBookmarkOpen"
       />
+      <ShortcutsDialog v-model="showShortcuts" />
+      <BackupDialog v-model="showBackup" />
     </div>
   </el-config-provider>
 </template>
@@ -181,6 +203,8 @@ import { useSettingsStore, elLocale } from '@/stores/settings'
 import CategoryTree from './components/CategoryTree.vue'
 import BookmarkList from './components/BookmarkList.vue'
 import SettingsDialog from './components/dialogs/SettingsDialog.vue'
+import ShortcutsDialog from './components/dialogs/ShortcutsDialog.vue'
+import BackupDialog from './components/dialogs/BackupDialog.vue'
 import BookmarkEditDialog from './components/dialogs/BookmarkEditDialog.vue'
 import TagManager from './components/dialogs/TagManager.vue'
 import BookmarkForm from './components/BookmarkForm.vue'
@@ -200,7 +224,9 @@ import {
   Upload,
   Document,
   FolderOpened,
-  Close
+  Close,
+  Monitor,
+  Refresh
 } from '@element-plus/icons-vue'
 import { importFromBrowser, exportToBrowser } from '@/services/import'
 import { storageService } from '@/services/storage'
@@ -232,6 +258,19 @@ const handleSearch = () => {
 
 const selectedCategoryId = ref<string | null>(null)
 const showSettings = ref(false)
+const showShortcuts = ref(false)
+const showBackup = ref(false)
+
+const handleSettingsCommand = (command: string) => {
+  if (command === 'system') {
+    showSettings.value = true
+  } else if (command === 'shortcuts') {
+    showShortcuts.value = true
+  } else if (command === 'backup') {
+    showBackup.value = true
+  }
+}
+
 const showBookmarkEdit = ref(false)
 const showTagManager = ref(false)
 const showCategoryEdit = ref(false)
@@ -403,14 +442,14 @@ const handleImportExport = async (command: string) => {
     switch (command) {
       case 'import-browser':
         const result = await importFromBrowser()
-        ElMessage.success(t('importExport.importSuccess', { categories: result.categories, bookmarks: result.bookmarks }))
+        ElMessage.success(t('importExport.importSuccess', [result.categories, result.bookmarks]))
         await bookmarkStore.loadBookmarks()
         await categoryStore.loadCategories()
         break
 
       case 'export-browser':
         const count = await exportToBrowser()
-        ElMessage.success(t('importExport.exportSuccess', { count }))
+        ElMessage.success(t('importExport.exportSuccess', [count]))
         break
 
       case 'export-json':

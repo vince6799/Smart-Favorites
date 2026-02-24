@@ -77,18 +77,36 @@ async function checkAutoBackup() {
         const data = await storageService.getData()
         const settings = data.settings
 
-        if (!settings.autoBackup) return
+        const now = Date.now()
 
-        const lastBackup = data.lastBackup || 0
-        const intervalMs = settings.backupInterval * 24 * 60 * 60 * 1000
+        // 1. 本地自动备份检查
+        if (settings.autoBackup) {
+            const lastBackup = data.lastBackup || 0
+            const intervalMs = settings.backupInterval * 24 * 60 * 60 * 1000
 
-        if (Date.now() - lastBackup > intervalMs) {
-            console.log('Starting auto backup...')
-            const timestamp = await storageService.performAutoBackup()
-            console.log('Auto backup completed at:', new Date(timestamp).toLocaleString())
+            if (now - lastBackup > intervalMs) {
+                console.log('Starting auto local backup...')
+                // performAutoBackup 会同时触发云端同步（如果开启的话）
+                const timestamp = await storageService.performAutoBackup()
+                console.log('Auto local backup completed at:', new Date(timestamp).toLocaleString())
+            }
+        }
+
+        // 2. 云端自动同步检查（如果本地备份还没触发同步，或者上次同步时间太久了）
+        // 重新读取数据，因为上面可能已经更新过数据了
+        const updatedData = await storageService.getData()
+        if (updatedData.settings.supabaseEnabled) {
+            const lastCloudSync = updatedData.lastCloudSync || 0
+            const cloudIntervalMs = (updatedData.settings.supabaseSyncInterval || 7) * 24 * 60 * 60 * 1000
+
+            if (now - lastCloudSync > cloudIntervalMs) {
+                console.log('Starting auto cloud sync...')
+                await storageService.syncToCloud()
+                console.log('Auto cloud sync completed')
+            }
         }
     } catch (error) {
-        console.error('Auto backup check failed:', error)
+        console.error('Backup/Sync check failed:', error)
     }
 }
 

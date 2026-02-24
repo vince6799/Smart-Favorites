@@ -1,5 +1,6 @@
 import type { StorageData, Category, Bookmark, Tag, Settings } from '@/types'
 import { generateId } from '@/utils/id'
+import { supabaseService } from './supabase'
 
 /**
  * 本地存储服务类
@@ -31,6 +32,29 @@ export class StorageService {
                 visitCount: (typeof b.visitCount === 'number' && !isNaN(b.visitCount)) ? b.visitCount : 0,
                 lastVisit: (typeof b.lastVisit === 'number' && !isNaN(b.lastVisit)) ? b.lastVisit : 0
             }))
+        }
+
+        // 数据归一化：Supabase 设置
+        if (data.settings) {
+            data.settings.supabaseEnabled = !!data.settings.supabaseEnabled
+            data.settings.supabaseUrl = data.settings.supabaseUrl || ''
+            data.settings.supabaseAnonKey = data.settings.supabaseAnonKey || ''
+            data.settings.supabaseTable = data.settings.supabaseTable || 'bookmarks_backup'
+
+            if (typeof data.settings.supabaseSyncInterval !== 'number') {
+                data.settings.supabaseSyncInterval = 7
+            }
+            if (typeof data.settings.supabaseMaxBackups !== 'number') {
+                data.settings.supabaseMaxBackups = 20
+            }
+        }
+
+        if (typeof data.lastCloudSync !== 'number') {
+            data.lastCloudSync = 0
+        }
+
+        if (typeof data.lastBackup !== 'number') {
+            data.lastBackup = 0
         }
 
         return data
@@ -265,7 +289,11 @@ export class StorageService {
      */
     async getSettings(): Promise<Settings> {
         const data = await this.getData()
-        return data.settings
+        return {
+            ...data.settings,
+            lastBackup: data.lastBackup,
+            lastCloudSync: data.lastCloudSync
+        }
     }
 
     /**
@@ -273,10 +301,17 @@ export class StorageService {
      */
     async updateSettings(updates: Partial<Settings>): Promise<void> {
         const data = await this.getData()
+
+        const { lastBackup, lastCloudSync, ...otherUpdates } = updates
+
         data.settings = {
             ...data.settings,
-            ...updates
+            ...otherUpdates
         }
+
+        if (typeof lastBackup === 'number') data.lastBackup = lastBackup
+        if (typeof lastCloudSync === 'number') data.lastCloudSync = lastCloudSync
+
         await this.setData(data)
     }
 
@@ -287,16 +322,59 @@ export class StorageService {
         const data = await this.getData()
         const timestamp = Date.now()
 
-        // 保存备份数据
+        // 保存本地备份数据
         await chrome.storage.local.set({
             [this.AUTO_BACKUP_KEY]: data
         })
 
-        // 更新最后备份时间并保存
+        // 更新最后备份时间
         data.lastBackup = timestamp
         await this.setData(data)
 
+        // 如果开启了云端同步，则尝试同步
+        if (data.settings.supabaseEnabled) {
+            try {
+                await this.syncToCloud()
+            } catch (error) {
+                console.error('Auto cloud sync failed:', error)
+            }
+        }
+
         return timestamp
+    }
+
+    /**
+     * 同步到云端
+     */
+    async syncToCloud(): Promise<void> {
+        const data = await this.getData()
+        if (!data.settings.supabaseEnabled) return
+
+        await supabaseService.uploadBackup(data)
+
+        // 更新最后同步时间
+        data.lastCloudSync = Date.now()
+        await this.setData(data)
+    }
+
+    /**
+     * 从云端还原
+     */
+    async restoreFromCloud(data?: any): Promise<void> {
+        const cloudData = data || await supabaseService.downloadBackup(await this.getSettings())
+        if (cloudData) {
+            const currentData = await this.getData()
+            const newData: StorageData = {
+                ...currentData,
+                categories: cloudData.categories,
+                bookmarks: cloudData.bookmarks,
+                tags: cloudData.tags,
+                lastCloudSync: Date.now()
+            }
+            await this.setData(newData)
+        } else {
+            throw new Error('No cloud backup found')
+        }
     }
 
     /**
@@ -597,10 +675,19 @@ export class StorageService {
                 enableShortcuts: true,
                 autoBackup: false,
                 backupInterval: 7,
-                language: 'en'
+                language: 'en',
+                supabaseEnabled: false,
+                supabaseUrl: '',
+                supabaseAnonKey: '',
+                supabaseTable: 'bookmarks_backup',
+                supabaseSyncInterval: 7,
+                supabaseMaxBackups: 20,
+                lastBackup: 0,
+                lastCloudSync: 0
             },
             version: '1.0.0',
-            lastBackup: 0
+            lastBackup: 0,
+            lastCloudSync: 0
         }
     }
 }

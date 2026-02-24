@@ -18,6 +18,8 @@ export const useSettingsStore = defineStore('settings', () => {
         enableShortcuts: true,
         autoBackup: false,
         backupInterval: 7,
+        supabaseSyncInterval: 7,
+        supabaseMaxBackups: 20,
         language: detectBrowserLocale()
     })
 

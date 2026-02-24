@@ -47,6 +47,14 @@ export interface Settings {
     autoBackup: boolean                     // 自动备份
     backupInterval: number                  // 备份间隔（天）
     language: 'zh' | 'en' | 'ja'           // 界面语言
+    supabaseEnabled: boolean                // 是否启用 Supabase 备份
+    supabaseUrl: string                     // Supabase URL
+    supabaseAnonKey: string                 // Supabase Anon Key
+    supabaseTable: string                   // Supabase 表名
+    supabaseSyncInterval: number            // 云端同步间隔（天）
+    supabaseMaxBackups: number              // 云端保留备份数量（0表示不限制）
+    lastBackup?: number                     // 最后本地备份时间
+    lastCloudSync?: number                  // 最后云端同步时间
 }
 
 // 存储数据接口
@@ -56,7 +64,8 @@ export interface StorageData {
     tags: Tag[]                   // 所有标签
     settings: Settings            // 用户设置
     version: string               // 数据版本号
-    lastBackup: number            // 最后备份时间
+    lastBackup: number            // 最后本地备份时间
+    lastCloudSync: number         // 最后云端同步时间
 }
 
 // 搜索过滤器
