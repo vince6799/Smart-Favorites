@@ -46,6 +46,7 @@ export interface Settings {
     enableShortcuts: boolean                // 是否启用快捷键
     autoBackup: boolean                     // 自动备份
     backupInterval: number                  // 备份间隔（天）
+    language: 'zh' | 'en' | 'ja'           // 界面语言
 }
 
 // 存储数据接口

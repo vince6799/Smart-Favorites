@@ -3,7 +3,7 @@
     <div class="category-item all-bookmarks" :class="{ active: selectedId === null }" @click="$emit('select', null)">
       <div class="collapse-spacer"></div>
       <el-icon><FolderOpened /></el-icon>
-      <span>全部书签</span>
+      <span>{{ t('app.allBookmarks') }}</span>
     </div>
     
     <div class="tree-content">
@@ -30,6 +30,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { FolderOpened } from '@element-plus/icons-vue'
 import draggable from 'vuedraggable'
 import { useCategoryStore } from '@/stores/category'
@@ -42,7 +43,9 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-defineEmits(['select', 'add', 'edit', 'delete'])
+const emit = defineEmits(['select', 'add', 'edit', 'delete'])
+
+const { t } = useI18n()
 
 const categoryStore = useCategoryStore()
 const dragList = ref<Category[]>([])

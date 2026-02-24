@@ -10,6 +10,9 @@ handleContextMenuClick()
 // 初始化快捷键
 setupCommands()
 
+// 启动时检查自动备份
+checkAutoBackup()
+
 // 监听来自popup的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     handleMessage(request, sender, sendResponse)
@@ -63,6 +66,29 @@ async function handleMessage(request: any, sender: chrome.runtime.MessageSender,
     } catch (error) {
         console.error('Message handling error:', error)
         sendResponse({ success: false, error: String(error) })
+    }
+}
+
+/**
+ * 检查并执行自动备份
+ */
+async function checkAutoBackup() {
+    try {
+        const data = await storageService.getData()
+        const settings = data.settings
+
+        if (!settings.autoBackup) return
+
+        const lastBackup = data.lastBackup || 0
+        const intervalMs = settings.backupInterval * 24 * 60 * 60 * 1000
+
+        if (Date.now() - lastBackup > intervalMs) {
+            console.log('Starting auto backup...')
+            const timestamp = await storageService.performAutoBackup()
+            console.log('Auto backup completed at:', new Date(timestamp).toLocaleString())
+        }
+    } catch (error) {
+        console.error('Auto backup check failed:', error)
     }
 }
 

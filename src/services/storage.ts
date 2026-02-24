@@ -6,6 +6,7 @@ import { generateId } from '@/utils/id'
  */
 export class StorageService {
     private readonly STORAGE_KEY = 'bookmark_extension_data'
+    private readonly AUTO_BACKUP_KEY = 'bookmark_auto_backup'
 
     /**
      * 获取所有数据
@@ -277,6 +278,39 @@ export class StorageService {
             ...updates
         }
         await this.setData(data)
+    }
+
+    /**
+     * 执行自动备份
+     */
+    async performAutoBackup(): Promise<number> {
+        const data = await this.getData()
+        const timestamp = Date.now()
+
+        // 保存备份数据
+        await chrome.storage.local.set({
+            [this.AUTO_BACKUP_KEY]: data
+        })
+
+        // 更新最后备份时间并保存
+        data.lastBackup = timestamp
+        await this.setData(data)
+
+        return timestamp
+    }
+
+    /**
+     * 从自动备份还原
+     */
+    async restoreFromAutoBackup(): Promise<void> {
+        const result = await chrome.storage.local.get(this.AUTO_BACKUP_KEY)
+        const backupData = result[this.AUTO_BACKUP_KEY]
+
+        if (backupData) {
+            await this.setData(backupData)
+        } else {
+            throw new Error('No backup found')
+        }
     }
 
     // ==================== 导入导出 ====================
@@ -562,7 +596,8 @@ export class StorageService {
                 showFavicon: true,
                 enableShortcuts: true,
                 autoBackup: false,
-                backupInterval: 7
+                backupInterval: 7,
+                language: 'en'
             },
             version: '1.0.0',
             lastBackup: 0

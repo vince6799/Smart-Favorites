@@ -1,17 +1,16 @@
+import { storageService } from '@/services/storage'
+
 /**
  * 设置快捷键命令
  */
 export function setupCommands() {
-    chrome.commands.onCommand.addListener((command) => {
+    chrome.commands.onCommand.addListener(async (command) => {
         if (command === 'quick_search') {
+            const settings = await storageService.getSettings()
+            if (settings.enableShortcuts === false) return
+
             // 打开弹窗并聚焦搜索框
             chrome.action.openPopup()
-            // 可以通过消息通知popup聚焦搜索框
-            setTimeout(() => {
-                chrome.runtime.sendMessage({
-                    type: 'FOCUS_SEARCH'
-                })
-            }, 100)
         }
     })
 }

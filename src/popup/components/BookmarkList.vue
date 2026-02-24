@@ -5,7 +5,7 @@
     :infinite-scroll-distance="100"
     :infinite-scroll-immediate="true"
   >
-    <el-empty v-if="bookmarks.length === 0" description="暂无书签" />
+    <el-empty v-if="bookmarks.length === 0" :description="t('bookmark.noBookmarks')" />
     
     <div v-else :class="['list-container', `view-${viewMode}`]">
       <div
@@ -15,20 +15,22 @@
         @click="$emit('click', bookmark)"
       >
         <div class="bookmark-main">
-          <img
-            v-if="bookmark.favicon"
-            :src="bookmark.favicon"
-            class="favicon"
-            @error="handleFaviconError"
-          />
-          <el-icon v-else class="favicon-placeholder"><Link /></el-icon>
+          <div v-if="showFavicon" class="favicon-container">
+            <img
+              v-if="bookmark.favicon"
+              :src="bookmark.favicon"
+              class="favicon"
+              @error="handleFaviconError"
+            />
+            <el-icon v-else class="favicon-placeholder"><Link /></el-icon>
+          </div>
           
           <div class="bookmark-info">
             <div class="bookmark-title">{{ bookmark.title }}</div>
             <!-- URL only visible in List and Card view -->
             <div v-if="viewMode !== 'grid'" class="bookmark-url">{{ bookmark.url }}</div>
-            <!-- Description only visible in Card view -->
-            <div v-if="viewMode === 'card' && bookmark.description" class="bookmark-description">
+            <!-- Description only visible in Card view and when enabled in settings -->
+            <div v-if="showDescription && viewMode === 'card' && bookmark.description" class="bookmark-description">
               {{ bookmark.description }}
             </div>
             <!-- Tags only visible in Card view -->
@@ -41,10 +43,10 @@
         </div>
         
         <div class="bookmark-actions">
-          <el-tooltip content="编辑">
+          <el-tooltip :content="t('common.edit')">
             <el-button :icon="Edit" size="small" circle @click.stop="$emit('edit', bookmark.id)" />
           </el-tooltip>
-          <el-tooltip content="删除">
+          <el-tooltip :content="t('common.delete')">
             <el-button :icon="Delete" size="small" circle @click.stop="$emit('delete', bookmark.id)" />
           </el-tooltip>
         </div>
@@ -53,23 +55,30 @@
     <!-- Loading indicator when more data is being loaded -->
     <div v-if="hasMore" class="loading-more">
       <el-icon class="is-loading"><Loading /></el-icon>
-      正在加载更多...
+      {{ t('bookmark.loadingMore') }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Link, Edit, Delete, Loading } from '@element-plus/icons-vue'
 import type { Bookmark } from '@/types'
+
+const { t } = useI18n()
 
 interface Props {
   bookmarks: Bookmark[]
   viewMode?: 'list' | 'grid' | 'card'
+  showFavicon?: boolean
+  showDescription?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  viewMode: 'list'
+  viewMode: 'list',
+  showFavicon: true,
+  showDescription: true
 })
 
 defineEmits(['click', 'edit', 'delete'])
@@ -91,7 +100,6 @@ const loadMore = () => {
   }
 }
 
-// Reset scroll count when bookmarks list changes (e.g., after search or category change)
 watch(() => props.bookmarks, () => {
   displayCount.value = pageSize
 }, { deep: false })

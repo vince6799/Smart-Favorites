@@ -1,176 +1,183 @@
 <template>
-  <div class="app-container" :class="{ 'standalone-mode': isStandalone }">
-    <!-- Standalone Mode View -->
-    <template v-if="isStandalone">
-      <div class="standalone-card">
-        <div class="standalone-header">
-          <h3>添加收藏</h3>
-          <el-button link @click="closeWindow">
-            <el-icon><Close /></el-icon>
-          </el-button>
-        </div>
-        <div class="standalone-body">
-          <BookmarkForm
-            :initial-data="standaloneForm"
-            :categories="categories"
-            :loading="bookmarkStore.loading"
-            @submit="handleStandaloneSubmit"
-            @cancel="closeWindow"
-          />
-        </div>
-      </div>
-    </template>
-
-    <!-- Normal Mode View -->
-    <template v-else>
-      <!-- 顶部工具栏 -->
-      <div class="header">
-        <div class="header-left">
-          <el-icon :size="20" color="var(--color-primary)"><Collection /></el-icon>
-          <span class="title">智能收藏夹</span>
-        </div>
-        <div class="header-right">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索书签..."
-            prefix-icon="Search"
-            clearable
-            class="search-input"
-            @input="handleSearch"
-          />
-          <el-tooltip content="标签管理">
-            <el-button :icon="PriceTag" circle @click="showTagManager = true" />
-          </el-tooltip>
-          <el-tooltip content="设置">
-            <el-button :icon="Setting" circle @click="showSettings = true" />
-          </el-tooltip>
-        </div>
-      </div>
-
-      <!-- 主内容区域 -->
-      <div class="main-content">
-        <!-- 左侧边栏 - 分类树 -->
-        <div class="sidebar">
-          <div class="sidebar-header">
-            <span>分类</span>
-            <el-button :icon="Plus" size="small" circle @click="handleAddCategory" />
+  <el-config-provider :locale="elLocale">
+    <div class="app-container" :class="{ 'standalone-mode': isStandalone }" @contextmenu.prevent>
+      <!-- Standalone Mode View -->
+      <template v-if="isStandalone">
+        <div class="standalone-card">
+          <div class="standalone-header">
+            <h3>{{ t('standalone.title') }}</h3>
+            <el-button link @click="closeWindow">
+              <el-icon><Close /></el-icon>
+            </el-button>
           </div>
-          <CategoryTree
-            :categories="categories"
-            :selected-id="selectedCategoryId"
-            @select="handleSelectCategory"
-            @add="handleAddCategory"
-            @edit="handleEditCategory"
-            @delete="handleDeleteCategory"
-          />
+          <div class="standalone-body">
+            <BookmarkForm
+              :initial-data="standaloneForm"
+              :categories="categories"
+              :loading="bookmarkStore.loading"
+              @submit="handleStandaloneSubmit"
+              @cancel="closeWindow"
+            />
+          </div>
+        </div>
+      </template>
+
+      <!-- Normal Mode View -->
+      <template v-else>
+        <!-- 顶部工具栏 -->
+        <div class="header">
+          <div class="header-left">
+            <el-icon :size="20" color="var(--color-primary)"><Collection /></el-icon>
+            <span class="title">{{ t('app.title') }}</span>
+          </div>
+          <div class="header-right">
+            <el-input
+              ref="searchInputRef"
+              v-model="searchQuery"
+              :placeholder="t('app.searchPlaceholder')"
+              prefix-icon="Search"
+              clearable
+              class="search-input"
+              @input="handleSearch"
+            />
+            <el-tooltip :content="t('app.tagManager')">
+              <el-button :icon="PriceTag" circle @click="showTagManager = true" />
+            </el-tooltip>
+            <el-tooltip :content="t('app.settings')">
+              <el-button :icon="Setting" circle @click="showSettings = true" />
+            </el-tooltip>
+          </div>
         </div>
 
-        <!-- 右侧主区域 - 书签列表 -->
-        <div class="content">
-          <div class="content-header">
-            <div class="content-title">
-              <span>{{ currentCategoryName }}</span>
-              <span class="count">({{ filteredBookmarks.length }})</span>
+        <!-- 主内容区域 -->
+        <div class="main-content">
+          <!-- 左侧边栏 - 分类树 -->
+          <div class="sidebar">
+            <div class="sidebar-header">
+              <span>{{ t('app.categories') }}</span>
+              <el-button :icon="Plus" size="small" circle @click="handleAddCategory" />
             </div>
-            <div class="content-actions">
-              <!-- 排序方式 -->
-              <el-select v-model="settings.sortBy" size="small" style="width: 100px">
-                <el-option label="创建时间" value="time" />
-                <el-option label="最后访问" value="lastVisit" />
-                <el-option label="名称" value="name" />
-                <el-option label="访问次数" value="visit" />
-              </el-select>
-
-              <!-- 视图切换 -->
-              <el-radio-group v-model="settings.defaultView" size="small">
-                <el-radio-button value="list">
-                  <el-icon><List /></el-icon>
-                </el-radio-button>
-                <el-radio-button value="grid">
-                  <el-icon><Grid /></el-icon>
-                </el-radio-button>
-                <el-radio-button value="card">
-                  <el-icon><Postcard /></el-icon>
-                </el-radio-button>
-              </el-radio-group>
-              
-              <el-button :icon="Plus" type="primary" size="small" @click="handleAddBookmark">
-                新建书签
-              </el-button>
-              <el-dropdown @command="handleImportExport">
-                <el-button :icon="More" size="small" />
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="import-browser">
-                      <el-icon><Download /></el-icon>
-                      从浏览器导入
-                    </el-dropdown-item>
-                    <el-dropdown-item command="export-browser">
-                      <el-icon><Upload /></el-icon>
-                      导出到浏览器
-                    </el-dropdown-item>
-                    <el-dropdown-item divided command="export-json">
-                      <el-icon><Document /></el-icon>
-                      导出为JSON
-                    </el-dropdown-item>
-                    <el-dropdown-item command="export-html">
-                      <el-icon><Document /></el-icon>
-                      导出为HTML
-                    </el-dropdown-item>
-                    <el-dropdown-item command="import-json">
-                      <el-icon><FolderOpened /></el-icon>
-                      从JSON导入
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
+            <CategoryTree
+              :categories="categories"
+              :selected-id="selectedCategoryId"
+              @select="handleSelectCategory"
+              @add="handleAddCategory"
+              @edit="handleEditCategory"
+              @delete="handleDeleteCategory"
+            />
           </div>
 
-          <BookmarkList
-            :bookmarks="filteredBookmarks"
-            :view-mode="settings.defaultView"
-            @click="handleBookmarkClick"
-            @edit="handleEditBookmark"
-            @delete="handleDeleteBookmark"
-          />
-        </div>
-      </div>
-    </template>
+          <!-- 右侧主区域 - 书签列表 -->
+          <div class="content">
+            <div class="content-header">
+              <div class="content-title">
+                <span>{{ currentCategoryName }}</span>
+                <span class="count">({{ filteredBookmarks.length }})</span>
+              </div>
+              <div class="content-actions">
+                <!-- 排序方式 -->
+                <el-select v-model="settings.sortBy" size="small" style="width: 120px">
+                  <el-option :label="t('sort.time')" value="time" />
+                  <el-option :label="t('sort.lastVisit')" value="lastVisit" />
+                  <el-option :label="t('sort.name')" value="name" />
+                  <el-option :label="t('sort.visit')" value="visit" />
+                </el-select>
 
-    <!-- 对话框 -->
-    <SettingsDialog v-model="showSettings" />
-    <BookmarkEditDialog
-      v-model="showBookmarkEdit"
-      :bookmark="editingBookmark"
-      :categories="categories"
-      :initial-category-id="selectedCategoryId || undefined"
-      @submit="handleBookmarkSubmit"
-    />
-    <TagManager v-if="showTagManager" v-model="showTagManager" />
-    <CategoryEditDialog
-      v-model="showCategoryEdit"
-      :category="editingCategory"
-      :default-parent-id="selectedCategoryId"
-      @submit="handleCategorySubmit"
-    />
-    <BookmarkDetailDialog
-      v-model="showBookmarkDetail"
-      :bookmark="viewingBookmark"
-      @edit="handleEditBookmark"
-      @delete="handleDeleteBookmark"
-      @open="handleBookmarkOpen"
-    />
-  </div>
+                <!-- 视图切换 -->
+                <el-radio-group v-model="settings.defaultView" size="small">
+                  <el-radio-button value="list">
+                    <el-icon><List /></el-icon>
+                  </el-radio-button>
+                  <el-radio-button value="grid">
+                    <el-icon><Grid /></el-icon>
+                  </el-radio-button>
+                  <el-radio-button value="card">
+                    <el-icon><Postcard /></el-icon>
+                  </el-radio-button>
+                </el-radio-group>
+                
+                <el-button :icon="Plus" type="primary" size="small" @click="handleAddBookmark">
+                  {{ t('app.newBookmark') }}
+                </el-button>
+                <el-dropdown @command="handleImportExport">
+                  <el-button :icon="More" size="small" />
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="import-browser">
+                        <el-icon><Download /></el-icon>
+                        {{ t('importExport.importBrowser') }}
+                      </el-dropdown-item>
+                      <el-dropdown-item command="export-browser">
+                        <el-icon><Upload /></el-icon>
+                        {{ t('importExport.exportBrowser') }}
+                      </el-dropdown-item>
+                      <el-dropdown-item divided command="export-json">
+                        <el-icon><Document /></el-icon>
+                        {{ t('importExport.exportJson') }}
+                      </el-dropdown-item>
+                      <el-dropdown-item command="export-html">
+                        <el-icon><Document /></el-icon>
+                        {{ t('importExport.exportHtml') }}
+                      </el-dropdown-item>
+                      <el-dropdown-item command="import-json">
+                        <el-icon><FolderOpened /></el-icon>
+                        {{ t('importExport.importJson') }}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
+
+            <BookmarkList
+              :bookmarks="filteredBookmarks"
+              :view-mode="settings.defaultView"
+              :show-favicon="settings.showFavicon"
+              :show-description="settings.showDescription"
+              @click="handleBookmarkClick"
+              @edit="handleEditBookmark"
+              @delete="handleDeleteBookmark"
+            />
+          </div>
+        </div>
+      </template>
+
+      <!-- 对话框 -->
+      <SettingsDialog v-model="showSettings" />
+      <BookmarkEditDialog
+        v-model="showBookmarkEdit"
+        :bookmark="editingBookmark"
+        :categories="categories"
+        :initial-category-id="selectedCategoryId || undefined"
+        @submit="handleBookmarkSubmit"
+      />
+      <TagManager v-if="showTagManager" v-model="showTagManager" />
+      <CategoryEditDialog
+        v-model="showCategoryEdit"
+        :category="editingCategory"
+        :default-parent-id="selectedCategoryId"
+        @submit="handleCategorySubmit"
+      />
+      <BookmarkDetailDialog
+        v-model="showBookmarkDetail"
+        :bookmark="viewingBookmark"
+        :categories="categories"
+        @edit="handleEditBookmark"
+        @delete="handleDeleteBookmark"
+        @open="handleBookmarkOpen"
+      />
+    </div>
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { useI18n } from 'vue-i18n'
+import { ElMessage, ElMessageBox, ElConfigProvider } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useBookmarkStore } from '@/stores/bookmark'
 import { useCategoryStore } from '@/stores/category'
-import { useSettingsStore } from '@/stores/settings'
+import { useSettingsStore, elLocale } from '@/stores/settings'
 import CategoryTree from './components/CategoryTree.vue'
 import BookmarkList from './components/BookmarkList.vue'
 import SettingsDialog from './components/dialogs/SettingsDialog.vue'
@@ -201,6 +208,8 @@ import { searchBookmarks } from '@/services/search'
 import { getFaviconUrl } from '@/utils/favicon'
 import type { Bookmark, Category } from '@/types'
 
+const { t } = useI18n()
+
 const bookmarkStore = useBookmarkStore()
 const categoryStore = useCategoryStore()
 const settingsStore = useSettingsStore()
@@ -210,6 +219,7 @@ const { categories } = storeToRefs(categoryStore)
 const { settings } = storeToRefs(settingsStore)
 
 const searchQuery = ref('')
+const searchInputRef = ref<any>(null)
 const debouncedSearchQuery = ref('')
 let searchTimeout: any = null
 
@@ -237,21 +247,20 @@ const standaloneForm = ref<Partial<Bookmark>>({})
 
 // 当前分类名称
 const currentCategoryName = computed(() => {
-  if (!selectedCategoryId.value) return '全部书签'
+  if (!selectedCategoryId.value) return t('app.allBookmarks')
+  if (selectedCategoryId.value === 'default') return t('category.default')
   const category = categories.value.find(c => c.id === selectedCategoryId.value)
-  return category?.name || '全部书签'
+  return category?.name || t('app.allBookmarks')
 })
 
 // 过滤后的书签
 const filteredBookmarks = computed(() => {
-  // 使用Fuse.js进行搜索
   let result = searchBookmarks(
     bookmarks.value,
     debouncedSearchQuery.value,
     selectedCategoryId.value ? { categoryId: selectedCategoryId.value } : undefined
   )
 
-  // 排序
   const sortBy = settings.value.sortBy
   return result.sort((a, b) => {
     switch (sortBy) {
@@ -269,19 +278,15 @@ const filteredBookmarks = computed(() => {
   })
 })
 
-
-// 选择分类
 const handleSelectCategory = (categoryId: string | null) => {
   selectedCategoryId.value = categoryId
 }
 
-// 添加分类
 const handleAddCategory = () => {
   editingCategory.value = undefined
   showCategoryEdit.value = true
 }
 
-// 编辑分类
 const handleEditCategory = (id: string) => {
   const category = categories.value.find(c => c.id === id)
   if (category) {
@@ -290,15 +295,12 @@ const handleEditCategory = (id: string) => {
   }
 }
 
-// 提交分类（新建或编辑）
 const handleCategorySubmit = async (data: Partial<Category>) => {
   try {
     if (data.id) {
-      // 编辑
       await categoryStore.updateCategory(data.id, data)
-      ElMessage.success('分类更新成功')
+      ElMessage.success(t('category.updateSuccess'))
     } else {
-      // 新建
       await categoryStore.addCategory({
         name: data.name!,
         parentId: data.parentId,
@@ -307,21 +309,20 @@ const handleCategorySubmit = async (data: Partial<Category>) => {
         order: 0,
         collapsed: false
       })
-      ElMessage.success('分类创建成功')
+      ElMessage.success(t('category.createSuccess'))
     }
   } catch (error) {
-    ElMessage.error('操作失败：' + error)
+    ElMessage.error(t('common.operationFailed', { error }))
   }
 }
 
-// 删除分类
 const handleDeleteCategory = (id: string) => {
   ElMessageBox.confirm(
-    '删除分类将同时删除该分类下的所有书签和子分类，是否继续？',
-    '警告',
+    t('category.deleteConfirm'),
+    t('common.warning'),
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+      confirmButtonText: t('common.confirm'),
+      cancelButtonText: t('common.cancel'),
       type: 'warning'
     }
   ).then(() => {
@@ -329,36 +330,30 @@ const handleDeleteCategory = (id: string) => {
     if (selectedCategoryId.value === id) {
       selectedCategoryId.value = null
     }
-    ElMessage.success('分类删除成功')
+    ElMessage.success(t('category.deleteSuccess'))
   }).catch(() => {})
 }
 
-// 添加书签
 const handleAddBookmark = () => {
   editingBookmark.value = undefined
   showBookmarkEdit.value = true
 }
 
-// 编辑书签
 const handleEditBookmark = (id: string) => {
   const bookmark = bookmarks.value.find(b => b.id === id)
   if (bookmark) {
     editingBookmark.value = bookmark
     showBookmarkEdit.value = true
-    // 如果是从详情页进来的，关闭详情页
     showBookmarkDetail.value = false
   }
 }
 
-// 提交书签（新建或编辑）
 const handleBookmarkSubmit = async (data: Partial<Bookmark>) => {
   try {
     if (data.id) {
-      // 编辑
       await bookmarkStore.updateBookmark(data.id, data)
-      ElMessage.success('书签更新成功')
+      ElMessage.success(t('bookmark.updateSuccess'))
     } else {
-      // 新建
       await bookmarkStore.addBookmark({
         title: data.title!,
         url: data.url!,
@@ -370,36 +365,31 @@ const handleBookmarkSubmit = async (data: Partial<Bookmark>) => {
         visitCount: 0,
         lastVisit: null
       })
-      ElMessage.success('书签添加成功')
+      ElMessage.success(t('bookmark.addSuccess'))
     }
   } catch (error: any) {
-    ElMessage.error(error.message || '操作失败')
+    ElMessage.error(error.message || t('common.operationFailed', { error }))
   }
 }
 
-// 删除书签
 const handleDeleteBookmark = (id: string) => {
-  ElMessageBox.confirm('确定要删除这个书签吗？', '警告', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+  ElMessageBox.confirm(t('bookmark.deleteConfirm'), t('common.warning'), {
+    confirmButtonText: t('common.confirm'),
+    cancelButtonText: t('common.cancel'),
     type: 'warning'
   }).then(() => {
     bookmarkStore.deleteBookmark(id)
-    ElMessage.success('书签删除成功')
+    ElMessage.success(t('bookmark.deleteSuccess'))
   }).catch(() => {})
 }
 
-// 点击书签
 const handleBookmarkClick = (bookmark: any) => {
-  // 打开详情页而不是直接跳转
   viewingBookmark.value = bookmark
   showBookmarkDetail.value = true
 }
 
-// 处理书签打开（记录访问次数）
 const handleBookmarkOpen = async (id: string) => {
   await bookmarkStore.incrementVisitCount(id)
-  // 同步更新当前查看的书签数据
   if (viewingBookmark.value && viewingBookmark.value.id === id) {
     const updated = bookmarkStore.bookmarks.find(b => b.id === id)
     if (updated) {
@@ -408,20 +398,19 @@ const handleBookmarkOpen = async (id: string) => {
   }
 }
 
-// 导入导出
 const handleImportExport = async (command: string) => {
   try {
     switch (command) {
       case 'import-browser':
         const result = await importFromBrowser()
-        ElMessage.success(`成功导入 ${result.categories} 个分类和 ${result.bookmarks} 个书签`)
+        ElMessage.success(t('importExport.importSuccess', { categories: result.categories, bookmarks: result.bookmarks }))
         await bookmarkStore.loadBookmarks()
         await categoryStore.loadCategories()
         break
 
       case 'export-browser':
         const count = await exportToBrowser()
-        ElMessage.success(`成功导出 ${count} 个书签到浏览器`)
+        ElMessage.success(t('importExport.exportSuccess', { count }))
         break
 
       case 'export-json':
@@ -432,7 +421,7 @@ const handleImportExport = async (command: string) => {
         a.href = url
         a.download = `bookmarks-${Date.now()}.json`
         a.click()
-        ElMessage.success('导出成功')
+        ElMessage.success(t('importExport.exportJsonSuccess'))
         break
 
       case 'export-html':
@@ -444,11 +433,10 @@ const handleImportExport = async (command: string) => {
         htmlA.download = `bookmarks-${Date.now()}.html`
         htmlA.click()
         URL.revokeObjectURL(htmlUrl)
-        ElMessage.success('导出成功')
+        ElMessage.success(t('importExport.exportHtmlSuccess'))
         break
 
       case 'import-json':
-        // 创建文件选择器
         const input = document.createElement('input')
         input.type = 'file'
         input.accept = 'application/json'
@@ -460,11 +448,11 @@ const handleImportExport = async (command: string) => {
               try {
                 const jsonStr = event.target?.result as string
                 await storageService.importFromJSON(jsonStr)
-                ElMessage.success('导入成功')
+                ElMessage.success(t('importExport.importJsonSuccess'))
                 await bookmarkStore.loadBookmarks()
                 await categoryStore.loadCategories()
               } catch (error) {
-                ElMessage.error('导入失败：' + error)
+                ElMessage.error(t('importExport.importJsonFailed', { error }))
               }
             }
             reader.readAsText(file)
@@ -474,11 +462,10 @@ const handleImportExport = async (command: string) => {
         break
     }
   } catch (error) {
-    ElMessage.error(`操作失败: ${error}`)
+    ElMessage.error(t('importExport.operationFailed', { error }))
   }
 }
 
-// Standalone Mode Handlers
 const handleStandaloneSubmit = async (data: Partial<Bookmark>) => {
   try {
     const url = data.url!
@@ -493,12 +480,12 @@ const handleStandaloneSubmit = async (data: Partial<Bookmark>) => {
       visitCount: 0,
       lastVisit: null
     })
-    ElMessage.success('书签添加成功')
+    ElMessage.success(t('bookmark.addSuccess'))
     setTimeout(() => {
       closeWindow()
     }, 1000)
   } catch (error: any) {
-    ElMessage.error(error.message || '操作失败')
+    ElMessage.error(error.message || t('common.operationFailed', { error }))
   }
 }
 
@@ -506,7 +493,6 @@ const closeWindow = () => {
   window.close()
 }
 
-// 主题切换逻辑
 const applyTheme = (theme: string) => {
   const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)
   if (isDark) {
@@ -520,29 +506,49 @@ watch(() => settings.value.theme, (newTheme) => {
   applyTheme(newTheme)
 })
 
-// 监听系统主题变化
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
   if (settings.value.theme === 'auto') {
     applyTheme('auto')
   }
 })
 
-// 初始化
 onMounted(async () => {
   await bookmarkStore.loadBookmarks()
   await categoryStore.loadCategories()
   await settingsStore.loadSettings()
   
-  // 应用初始主题
   applyTheme(settings.value.theme)
+
+  // Global keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (!settings.value.enableShortcuts) return
+
+    // Don't trigger if user is typing in an input
+    const target = e.target as HTMLElement
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+      return
+    }
+
+    if (e.key === '/') {
+      e.preventDefault()
+      searchInputRef.value?.focus()
+    } else if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault()
+      handleAddBookmark()
+    }
+  })
   
-  // 处理来自右键菜单或其他页面的参数
   const params = new URLSearchParams(window.location.search)
   const action = params.get('action')
   const mode = params.get('mode')
   
   if (mode === 'standalone') {
     isStandalone.value = true
+  } else {
+    // 非独立窗口模式下，默认聚焦搜索框
+    setTimeout(() => {
+      searchInputRef.value?.focus()
+    }, 100)
   }
 
   if (action === 'add') {
@@ -627,7 +633,7 @@ onMounted(async () => {
 }
 
 .sidebar {
-  width: 250px;
+  width: 210px;
   border-right: 1px solid var(--border-color);
   background: var(--bg-secondary);
   display: flex;
@@ -651,18 +657,27 @@ onMounted(async () => {
 }
 
 .content-header {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--spacing-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
+  gap: var(--spacing-sm);
 }
 
 .content-title {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
   font-weight: 600;
+  min-width: 0;
+  flex: 1;
+}
+
+.content-title span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .count {
@@ -673,7 +688,8 @@ onMounted(async () => {
 
 .content-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
 }
 
 /* Standalone Mode Styles */

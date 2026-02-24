@@ -17,7 +17,7 @@
       </el-icon>
       <div v-else class="collapse-spacer"></div>
       <span class="icon">{{ category.icon }}</span>
-      <span class="name">{{ category.name }}</span>
+      <span class="name">{{ category.id === 'default' ? t('category.default') : category.name }}</span>
       
       <el-dropdown 
         v-if="category.id !== 'default'"
@@ -30,8 +30,8 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="edit" :icon="Edit">编辑</el-dropdown-item>
-            <el-dropdown-item command="delete" :icon="Delete" type="danger">删除</el-dropdown-item>
+            <el-dropdown-item command="edit" :icon="Edit">{{ t('common.edit') }}</el-dropdown-item>
+            <el-dropdown-item command="delete" :icon="Delete" type="danger">{{ t('common.delete') }}</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -62,6 +62,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { CaretRight, MoreFilled, Edit, Delete } from '@element-plus/icons-vue'
 import { ElDropdown, ElDropdownMenu, ElDropdownItem, ElIcon } from 'element-plus'
 import draggable from 'vuedraggable'
@@ -74,6 +75,8 @@ interface Props {
   selectedId: string | null
   level?: number
 }
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<Props>(), {
   level: 0

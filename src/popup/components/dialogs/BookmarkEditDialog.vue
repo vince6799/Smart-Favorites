@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="isEdit ? '编辑书签' : '添加书签'"
+    :title="isEdit ? t('bookmark.edit') : t('bookmark.add')"
     width="500px"
     destroy-on-close
     :close-on-click-modal="false"
@@ -18,8 +18,11 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Bookmark, Category } from '@/types'
 import BookmarkForm from '../BookmarkForm.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   modelValue: boolean

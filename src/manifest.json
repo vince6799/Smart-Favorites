@@ -1,8 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "智能收藏夹",
-    "version": "1.1.1",
-    "description": "功能强大的浏览器收藏夹管理工具，支持多级分类、标签、搜索和数据导入导出",
+    "name": "__MSG_appName__",
+    "version": "1.1.2",
+    "default_locale": "en",
+    "description": "__MSG_appDesc__",
     "icons": {
         "16": "icons/icon-16.png",
         "48": "icons/icon-48.png",
@@ -14,7 +15,7 @@
             "16": "icons/icon-16.png",
             "48": "icons/icon-48.png"
         },
-        "default_title": "智能收藏夹"
+        "default_title": "__MSG_appName__"
     },
     "background": {
         "service_worker": "src/background/index.ts",
@@ -31,17 +32,17 @@
     "commands": {
         "_execute_action": {
             "suggested_key": {
-                "default": "Ctrl+Shift+B",
-                "mac": "Command+Shift+B"
+                "default": "Alt+Shift+M",
+                "mac": "Option+Shift+M"
             },
-            "description": "打开收藏夹"
+            "description": "__MSG_openApp__"
         },
         "quick_search": {
             "suggested_key": {
-                "default": "Ctrl+Shift+F",
-                "mac": "Command+Shift+F"
+                "default": "Alt+Shift+Q",
+                "mac": "Option+Shift+Q"
             },
-            "description": "快速搜索"
+            "description": "__MSG_quickSearch__"
         }
     }
 }

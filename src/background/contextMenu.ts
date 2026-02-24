@@ -6,7 +6,7 @@ export function setupContextMenus() {
         // 创建主菜单项
         chrome.contextMenus.create({
             id: 'save-to-bookmarks',
-            title: '保存到我的收藏夹',
+            title: chrome.i18n.getMessage('saveToBookmarks'),
             contexts: ['page', 'link', 'selection']
         })
 
@@ -14,7 +14,7 @@ export function setupContextMenus() {
         chrome.contextMenus.create({
             id: 'save-to-default',
             parentId: 'save-to-bookmarks',
-            title: '保存到默认分类',
+            title: chrome.i18n.getMessage('saveToDefault'),
             contexts: ['page', 'link']
         })
 
@@ -22,7 +22,7 @@ export function setupContextMenus() {
         chrome.contextMenus.create({
             id: 'save-with-category',
             parentId: 'save-to-bookmarks',
-            title: '选择分类...',
+            title: chrome.i18n.getMessage('saveWithCategory'),
             contexts: ['page', 'link']
         })
     })
@@ -52,13 +52,13 @@ export function handleContextMenuClick() {
                 if (existing) {
                     const categories = await storageService.getCategories()
                     const category = categories.find(c => c.id === existing.categoryId)
-                    const categoryName = category ? category.name : '未知分类'
+                    const categoryName = category ? category.name : chrome.i18n.getMessage('unknownCategory')
 
                     chrome.notifications.create({
                         type: 'basic',
                         iconUrl: '/icons/icon-48.png',
-                        title: '该网址已收藏',
-                        message: `已存在于【${categoryName}】分类下`
+                        title: chrome.i18n.getMessage('alreadyBookmarked'),
+                        message: chrome.i18n.getMessage('existsIn', [categoryName])
                     })
                     return
                 }
@@ -79,15 +79,15 @@ export function handleContextMenuClick() {
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: '/icons/icon-48.png',
-                    title: '已保存',
-                    message: `已保存 "${title}" 到默认分类`
+                    title: chrome.i18n.getMessage('saveSuccess'),
+                    message: chrome.i18n.getMessage('saveMessage', [title])
                 })
             } catch (error) {
                 console.error('Save failed:', error)
                 chrome.notifications.create({
                     type: 'basic',
                     iconUrl: '/icons/icon-48.png',
-                    title: '保存失败',
+                    title: chrome.i18n.getMessage('saveFailed'),
                     message: String(error)
                 })
             }

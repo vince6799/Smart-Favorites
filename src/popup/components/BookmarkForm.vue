@@ -7,31 +7,31 @@
     status-icon
     class="bookmark-form"
   >
-    <el-form-item label="标题" prop="title">
-      <el-input v-model="form.title" placeholder="请输入书签标题" />
+    <el-form-item :label="t('bookmark.title')" prop="title">
+      <el-input v-model="form.title" :placeholder="t('bookmark.titlePlaceholder')" />
     </el-form-item>
 
-    <el-form-item label="网址" prop="url">
-      <el-input v-model="form.url" placeholder="https://example.com" />
+    <el-form-item :label="t('bookmark.url')" prop="url">
+      <el-input v-model="form.url" :placeholder="t('bookmark.urlPlaceholder')" />
     </el-form-item>
 
-    <el-form-item label="分类" prop="categoryId">
+    <el-form-item :label="t('bookmark.category')" prop="categoryId">
       <el-tree-select
         v-model="form.categoryId"
         :data="treeData"
         :props="{ label: 'name', value: 'id', children: 'children' }"
         check-strictly
-        placeholder="请选择分类"
+        :placeholder="t('bookmark.categoryPlaceholder')"
         style="width: 100%"
       />
     </el-form-item>
 
-    <el-form-item label="标签" prop="tags">
+    <el-form-item :label="t('bookmark.tags')" prop="tags">
       <el-select
         v-model="form.tags"
         multiple
         filterable
-        placeholder="请选择标签"
+        :placeholder="t('bookmark.tagsPlaceholder')"
         style="width: 100%"
       >
         <el-option
@@ -43,19 +43,19 @@
       </el-select>
     </el-form-item>
 
-    <el-form-item label="描述" prop="description">
+    <el-form-item :label="t('bookmark.description')" prop="description">
       <el-input
         v-model="form.description"
         type="textarea"
         :rows="2"
-        placeholder="请输入描述（可选）"
+        :placeholder="t('bookmark.descriptionPlaceholder')"
       />
     </el-form-item>
 
     <div class="form-actions" v-if="showFooter">
-      <el-button @click="$emit('cancel')">取消</el-button>
+      <el-button @click="$emit('cancel')">{{ t('common.cancel') }}</el-button>
       <el-button type="primary" @click="handleSave" :loading="loading">
-        确定
+        {{ t('common.confirm') }}
       </el-button>
     </div>
   </el-form>
@@ -63,9 +63,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { FormInstance, FormRules } from 'element-plus'
 import { storageService } from '@/services/storage'
 import type { Bookmark, Category } from '@/types'
+
+const { t } = useI18n()
 
 const props = withDefaults(defineProps<{
   initialData?: Partial<Bookmark>
@@ -94,25 +97,27 @@ const form = reactive({
   description: ''
 })
 
-const rules: FormRules = {
-  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+const rules = computed<FormRules>(() => ({
+  title: [{ required: true, message: t('bookmark.titleRequired'), trigger: 'blur' }],
   url: [
-    { required: true, message: '请输入网址', trigger: 'blur' },
-    { type: 'url', message: '请输入正确的网址格式', trigger: 'blur' }
+    { required: true, message: t('bookmark.urlRequired'), trigger: 'blur' },
+    { type: 'url', message: t('bookmark.urlInvalid'), trigger: 'blur' }
   ],
-  categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }]
-}
+  categoryId: [{ required: true, message: t('bookmark.categoryRequired'), trigger: 'change' }]
+}))
 
 const treeData = computed(() => {
   const map = new Map<string, any>()
   const roots: any[] = []
 
-  // Create nodes
   props.categories.forEach(c => {
-    map.set(c.id, { ...c, children: [] })
+    map.set(c.id, { 
+      ...c, 
+      name: c.id === 'default' ? t('category.default') : c.name,
+      children: [] 
+    })
   })
 
-  // Build tree
   props.categories.forEach(c => {
     const node = map.get(c.id)
     if (c.parentId !== null && c.parentId !== undefined && c.parentId !== '' && map.has(c.parentId)) {

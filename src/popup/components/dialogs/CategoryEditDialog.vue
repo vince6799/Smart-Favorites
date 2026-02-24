@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :model-value="modelValue"
-    :title="isEdit ? '编辑分类' : '新建分类'"
+    :title="isEdit ? t('category.edit') : t('category.new')"
     width="450px"
     @update:model-value="$emit('update:modelValue', $event)"
     @close="handleClose"
@@ -12,27 +12,27 @@
       :rules="rules"
       label-width="80px"
     >
-      <el-form-item label="分类名称" prop="name">
+      <el-form-item :label="t('category.name')" prop="name">
         <el-input
           v-model="formData.name"
-          placeholder="请输入分类名称"
+          :placeholder="t('category.nameRequired')"
           clearable
         />
       </el-form-item>
 
-      <el-form-item label="父分类">
+      <el-form-item :label="t('category.parent')">
         <el-cascader
           v-model="selectedParentPath"
           :options="categoryOptions"
           :props="cascaderProps"
-          placeholder="无（作为根分类）"
+          :placeholder="t('category.noParent')"
           clearable
           style="width: 100%"
           @change="handleParentChange"
         />
       </el-form-item>
 
-      <el-form-item label="图标">
+      <el-form-item :label="t('category.icon')">
         <div class="icon-selector">
           <div
             v-for="emoji in emojiList"
@@ -46,7 +46,7 @@
         </div>
       </el-form-item>
 
-      <el-form-item label="颜色">
+      <el-form-item :label="t('category.color')">
         <div class="color-selector">
           <div
             v-for="color in colorList"
@@ -61,9 +61,9 @@
     </el-form>
 
     <template #footer>
-      <el-button @click="handleClose">取消</el-button>
+      <el-button @click="handleClose">{{ t('category.cancel') }}</el-button>
       <el-button type="primary" @click="handleSubmit">
-        {{ isEdit ? '保存' : '创建' }}
+        {{ isEdit ? t('category.save') : t('category.create') }}
       </el-button>
     </template>
   </el-dialog>
@@ -71,10 +71,13 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import type { Category } from '@/types'
 import { useCategoryStore } from '@/stores/category'
+
+const { t } = useI18n()
 
 interface Props {
   modelValue: boolean
@@ -107,24 +110,20 @@ const formData = ref({
 
 const selectedParentPath = ref<string[]>([])
 
-// 图标列表
 const emojiList = [
   '📁', '📂', '📚', '📖', '📝', '📰', '🗂️', '📋',
   '💼', '🎯', '🎨', '🎮', '🎵', '🎬', '📷', '🏠',
   '💻', '🔧', '🔨', '⚙️', '🌟', '⭐', '❤️', '🔥'
 ]
 
-// 颜色列表
 const colorList = [
   '#409EFF', '#67C23A', '#E6A23C', '#F56C6C',
   '#909399', '#ff6b6b', '#4ecdc4', '#45b7d1',
   '#96ceb4', '#ffeaa7', '#a29bfe', '#fd79a8'
 ]
 
-// 是否为编辑模式
 const isEdit = computed(() => !!props.category)
 
-// 分类级联选择器配置
 const cascaderProps = {
   value: 'id',
   label: 'name',
@@ -133,11 +132,9 @@ const cascaderProps = {
   emitPath: false
 }
 
-// 构建分类树（排除当前分类及其子分类）
 const categoryOptions = computed(() => {
   const excludeIds = new Set<string>()
   
-  // 如果是编辑模式，需要排除当前分类及其子分类
   if (isEdit.value && props.category) {
     const addDescendants = (id: string) => {
       excludeIds.add(id)
@@ -154,29 +151,25 @@ const categoryOptions = computed(() => {
       .sort((a, b) => a.order - b.order)
       .map(c => ({
         id: c.id,
-        name: c.name,
+        name: c.id === 'default' ? t('category.default') : c.name,
         children: buildTree(c.id)
       }))
   }
   return buildTree()
 })
 
-// 表单验证规则
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   name: [
-    { required: true, message: '请输入分类名称', trigger: 'blur' }
+    { required: true, message: t('category.nameRequired'), trigger: 'blur' }
   ]
-}
+}))
 
-// 父分类变更处理
 const handleParentChange = (value: string) => {
   formData.value.parentId = value || null
 }
 
-// 初始化表单数据
 const initFormData = () => {
   if (props.category) {
-    // 编辑模式
     formData.value = {
       name: props.category.name,
       parentId: props.category.parentId,
@@ -185,7 +178,6 @@ const initFormData = () => {
     }
     selectedParentPath.value = props.category.parentId ? [props.category.parentId] : []
   } else {
-    // 新建模式
     formData.value = {
       name: '',
       parentId: props.defaultParentId,
@@ -196,13 +188,11 @@ const initFormData = () => {
   }
 }
 
-// 关闭对话框
 const handleClose = () => {
   formRef.value?.resetFields()
   emit('update:modelValue', false)
 }
 
-// 提交表单
 const handleSubmit = async () => {
   if (!formRef.value) return
 
@@ -219,12 +209,11 @@ const handleSubmit = async () => {
       emit('submit', submitData)
       handleClose()
     } else {
-      ElMessage.warning('请完善表单信息')
+      ElMessage.warning(t('category.formIncomplete'))
     }
   })
 }
 
-// 监听对话框打开
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     initFormData()
