@@ -7,19 +7,25 @@
     "dev": "vite",
     "build": "vue-tsc && npm run build:extension",
     "build:extension": "cross-env VITE_BUILD_TARGET=extension vite build",
+    "build:chrome": "cross-env VITE_BUILD_TARGET=extension TARGET_BROWSER=chrome vite build",
+    "build:firefox": "cross-env VITE_BUILD_TARGET=extension TARGET_BROWSER=firefox vite build",
+    "build:edge": "cross-env VITE_BUILD_TARGET=extension TARGET_BROWSER=chrome vite build",
+    "build:all": "npm run build:chrome && npm run build:firefox",
     "build:web": "node scripts/build-showcase.js",
     "preview": "vite preview"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "@supabase/supabase-js": "^2.97.0",
+    "@types/webextension-polyfill": "^0.12.5",
     "date-fns": "^3.3.1",
     "element-plus": "^2.5.6",
     "fuse.js": "^7.0.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
     "vue-i18n": "^9.14.5",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.260",

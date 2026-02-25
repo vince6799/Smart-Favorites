@@ -1,3 +1,4 @@
+import browser from 'webextension-polyfill'
 import { setupContextMenus, handleContextMenuClick } from './contextMenu'
 import { setupCommands } from './commands'
 import { storageService } from '@/services/storage'
@@ -14,7 +15,7 @@ setupCommands()
 checkAutoBackup()
 
 // 监听来自popup的消息
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     handleMessage(request, sender, sendResponse)
     return true // 保持消息通道打开以支持异步响应
 })
@@ -22,7 +23,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 /**
  * 处理消息
  */
-async function handleMessage(request: any, sender: chrome.runtime.MessageSender, sendResponse: (response: any) => void) {
+async function handleMessage(request: any, sender: browser.Runtime.MessageSender, sendResponse: (response: any) => void) {
     try {
         switch (request.type) {
             case 'ADD_BOOKMARK':
@@ -43,7 +44,7 @@ async function handleMessage(request: any, sender: chrome.runtime.MessageSender,
 
             case 'GET_CURRENT_TAB':
                 // 获取当前标签页信息
-                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+                const [tab] = await browser.tabs.query({ active: true, currentWindow: true })
                 sendResponse({
                     success: true,
                     data: {
@@ -111,11 +112,11 @@ async function checkAutoBackup() {
 }
 
 // 扩展安装或更新时的处理
-chrome.runtime.onInstalled.addListener((details) => {
+browser.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
         console.log('扩展已安装')
         // 可以打开欢迎页面
-        // chrome.tabs.create({ url: '/welcome.html' })
+        // browser.tabs.create({ url: '/welcome.html' })
     } else if (details.reason === 'update') {
         console.log('扩展已更新')
     }

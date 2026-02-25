@@ -1,28 +1,30 @@
+import browser from 'webextension-polyfill'
+
 /**
  * 创建右键菜单
  */
 export function setupContextMenus() {
-    chrome.runtime.onInstalled.addListener(() => {
+    browser.runtime.onInstalled.addListener(() => {
         // 创建主菜单项
-        chrome.contextMenus.create({
+        browser.contextMenus.create({
             id: 'save-to-bookmarks',
-            title: chrome.i18n.getMessage('saveToBookmarks'),
+            title: browser.i18n.getMessage('saveToBookmarks'),
             contexts: ['page', 'link', 'selection']
         })
 
         // 创建子菜单 - 快速保存到默认分类
-        chrome.contextMenus.create({
+        browser.contextMenus.create({
             id: 'save-to-default',
             parentId: 'save-to-bookmarks',
-            title: chrome.i18n.getMessage('saveToDefault'),
+            title: browser.i18n.getMessage('saveToDefault'),
             contexts: ['page', 'link']
         })
 
         // 创建子菜单 - 选择分类
-        chrome.contextMenus.create({
+        browser.contextMenus.create({
             id: 'save-with-category',
             parentId: 'save-to-bookmarks',
-            title: chrome.i18n.getMessage('saveWithCategory'),
+            title: browser.i18n.getMessage('saveWithCategory'),
             contexts: ['page', 'link']
         })
     })
@@ -38,7 +40,7 @@ import { getFaviconUrl } from '@/utils/favicon'
  * 处理右键菜单点击
  */
 export function handleContextMenuClick() {
-    chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    browser.contextMenus.onClicked.addListener(async (info, tab) => {
         if (!tab) return
 
         const url = info.linkUrl || tab.url || ''
@@ -52,13 +54,13 @@ export function handleContextMenuClick() {
                 if (existing) {
                     const categories = await storageService.getCategories()
                     const category = categories.find(c => c.id === existing.categoryId)
-                    const categoryName = category ? category.name : chrome.i18n.getMessage('unknownCategory')
+                    const categoryName = category ? category.name : browser.i18n.getMessage('unknownCategory')
 
-                    chrome.notifications.create({
+                    browser.notifications.create({
                         type: 'basic',
                         iconUrl: '/icons/icon-48.png',
-                        title: chrome.i18n.getMessage('alreadyBookmarked'),
-                        message: chrome.i18n.getMessage('existsIn', [categoryName])
+                        title: browser.i18n.getMessage('alreadyBookmarked'),
+                        message: browser.i18n.getMessage('existsIn', [categoryName])
                     })
                     return
                 }
@@ -76,25 +78,25 @@ export function handleContextMenuClick() {
                 })
 
                 // 显示通知
-                chrome.notifications.create({
+                browser.notifications.create({
                     type: 'basic',
                     iconUrl: '/icons/icon-48.png',
-                    title: chrome.i18n.getMessage('saveSuccess'),
-                    message: chrome.i18n.getMessage('saveMessage', [title])
+                    title: browser.i18n.getMessage('saveSuccess'),
+                    message: browser.i18n.getMessage('saveMessage', [title])
                 })
             } catch (error) {
                 console.error('Save failed:', error)
-                chrome.notifications.create({
+                browser.notifications.create({
                     type: 'basic',
                     iconUrl: '/icons/icon-48.png',
-                    title: chrome.i18n.getMessage('saveFailed'),
+                    title: browser.i18n.getMessage('saveFailed'),
                     message: String(error)
                 })
             }
         } else if (info.menuItemId === 'save-with-category') {
             // 打开选择分类弹窗
             // Use correct path consistent with build output
-            chrome.windows.create({
+            browser.windows.create({
                 url: `/src/popup/index.html?action=add&mode=standalone&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`,
                 type: 'popup',
                 width: 400,

@@ -1,3 +1,4 @@
+import browser from 'webextension-polyfill'
 import type { Category, Bookmark } from '@/types'
 import { storageService } from './storage'
 import { generateId } from '@/utils/id'
@@ -9,7 +10,7 @@ import { getFaviconUrl } from '@/utils/favicon'
 export async function importFromBrowser(): Promise<{ categories: number, bookmarks: number }> {
     try {
         // 获取浏览器书签树
-        const tree = await chrome.bookmarks.getTree()
+        const tree = await browser.bookmarks.getTree()
 
         if (!tree || tree.length === 0) {
             throw new Error('无法读取浏览器书签')
@@ -30,7 +31,7 @@ export async function importFromBrowser(): Promise<{ categories: number, bookmar
  * 递归转换书签树
  */
 function convertBookmarkTree(
-    node: chrome.bookmarks.BookmarkTreeNode,
+    node: browser.Bookmarks.BookmarkTreeNode,
     parentId: string | null = null
 ): { categories: Category[], bookmarks: Bookmark[] } {
     const categories: Category[] = []
@@ -108,7 +109,7 @@ export async function exportToBrowser(categoryId?: string): Promise<number> {
         const targetBookmarks = bookmarks.filter(b => categoryIds.includes(b.categoryId))
 
         // 在浏览器书签栏中创建根文件夹
-        const rootFolder = await chrome.bookmarks.create({
+        const rootFolder = await browser.bookmarks.create({
             parentId: '1',  // '1' 是书签栏
             title: `智能收藏夹导出 - ${new Date().toLocaleDateString()}`
         })
@@ -160,7 +161,7 @@ async function createBrowserBookmarkTree(
 
     for (const category of currentCategories) {
         // 创建文件夹
-        const folder = await chrome.bookmarks.create({
+        const folder = await browser.bookmarks.create({
             parentId: parentBrowserId,
             title: category.name
         })
@@ -171,7 +172,7 @@ async function createBrowserBookmarkTree(
             .sort((a, b) => a.order - b.order)
 
         for (const bookmark of categoryBookmarks) {
-            await chrome.bookmarks.create({
+            await browser.bookmarks.create({
                 parentId: folder.id,
                 title: bookmark.title,
                 url: bookmark.url

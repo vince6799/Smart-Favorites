@@ -1,0 +1,55 @@
+{
+    "appName": {
+        "message": "智能收藏夹",
+        "description": "扩展名称"
+    },
+    "appDesc": {
+        "message": "功能强大的浏览器收藏夹管理工具，支持多级分类、标签、搜索和数据导入导出",
+        "description": "扩展描述"
+    },
+    "openApp": {
+        "message": "打开收藏夹",
+        "description": "打开扩展的命令描述"
+    },
+    "quickSearch": {
+        "message": "快速搜索",
+        "description": "快速搜索的命令描述"
+    },
+    "saveToBookmarks": {
+        "message": "保存到我的收藏夹"
+    },
+    "saveToDefault": {
+        "message": "保存到默认分类"
+    },
+    "saveWithCategory": {
+        "message": "选择分类..."
+    },
+    "alreadyBookmarked": {
+        "message": "该网址已收藏"
+    },
+    "existsIn": {
+        "message": "已存在于【$CATEGORY_NAME$】分类下",
+        "placeholders": {
+            "category_name": {
+                "content": "$1"
+            }
+        }
+    },
+    "unknownCategory": {
+        "message": "未知分类"
+    },
+    "saveSuccess": {
+        "message": "已保存"
+    },
+    "saveMessage": {
+        "message": "已保存 \"$TITLE$\" 到默认分类",
+        "placeholders": {
+            "title": {
+                "content": "$1"
+            }
+        }
+    },
+    "saveFailed": {
+        "message": "保存失败"
+    }
+}

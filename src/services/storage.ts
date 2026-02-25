@@ -1,3 +1,4 @@
+import browser from 'webextension-polyfill'
 import type { StorageData, Category, Bookmark, Tag, Settings } from '@/types'
 import { generateId } from '@/utils/id'
 import { supabaseService } from './supabase'
@@ -13,8 +14,9 @@ export class StorageService {
      * 获取所有数据
      */
     async getData(): Promise<StorageData> {
-        const result = await chrome.storage.local.get(this.STORAGE_KEY)
-        const data = result[this.STORAGE_KEY] || this.getDefaultData()
+        const result = await browser.storage.local.get(this.STORAGE_KEY)
+        const rawData = result[this.STORAGE_KEY] || this.getDefaultData()
+        const data = rawData as StorageData
 
         // 数据归一化：确保所有分类都有 collapsed 属性，并默认折叠（除了根节点或已设定的）
         if (data.categories) {
@@ -70,7 +72,7 @@ export class StorageService {
             version: '1.0.0'
         }))
 
-        await chrome.storage.local.set({
+        await browser.storage.local.set({
             [this.STORAGE_KEY]: cleanData
         })
     }
@@ -323,7 +325,7 @@ export class StorageService {
         const timestamp = Date.now()
 
         // 保存本地备份数据
-        await chrome.storage.local.set({
+        await browser.storage.local.set({
             [this.AUTO_BACKUP_KEY]: data
         })
 
@@ -381,8 +383,8 @@ export class StorageService {
      * 从自动备份还原
      */
     async restoreFromAutoBackup(): Promise<void> {
-        const result = await chrome.storage.local.get(this.AUTO_BACKUP_KEY)
-        const backupData = result[this.AUTO_BACKUP_KEY]
+        const result = await browser.storage.local.get(this.AUTO_BACKUP_KEY)
+        const backupData = result[this.AUTO_BACKUP_KEY] as StorageData
 
         if (backupData) {
             await this.setData(backupData)
