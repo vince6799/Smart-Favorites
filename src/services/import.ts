@@ -18,16 +18,8 @@ export async function importFromBrowser(): Promise<{ categories: number, bookmar
         // 递归转换为我们的数据结构
         const { categories, bookmarks } = convertBookmarkTree(tree[0])
 
-        // 保存到本地存储
-        const data = await storageService.getData()
-        data.categories.push(...categories)
-        data.bookmarks.push(...bookmarks)
-        await storageService.setData(data)
-
-        return {
-            categories: categories.length,
-            bookmarks: bookmarks.length
-        }
+        // 使用 mergeData 进行智能合并与去重
+        return await storageService.mergeData({ categories, bookmarks })
     } catch (error) {
         console.error('导入失败:', error)
         throw error

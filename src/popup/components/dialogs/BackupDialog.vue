@@ -152,6 +152,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { t as tGlobal } from '@/i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useSettingsStore } from '@/stores/settings'
 import { useBookmarkStore } from '@/stores/bookmark'
@@ -160,7 +161,8 @@ import { storageService } from '@/services/storage'
 import { supabaseService } from '@/services/supabase'
 import type { Settings } from '@/types'
 
-const { t } = useI18n()
+const i18n = useI18n()
+const t = tGlobal
 const props = defineProps<{
   modelValue: boolean
 }>()

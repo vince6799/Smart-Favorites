@@ -34,4 +34,22 @@ export const i18n = createI18n({
     messages: { en, zh, ja }
 })
 
+/**
+ * A safe translation helper that handles named interpolation manually.
+ * Required because vue-i18n runtime build (for CSP) doesn't support dynamic interpolation.
+ */
+export function t(key: string, params?: Record<string, any>): string {
+    const { t: baseT } = i18n.global
+    let message = baseT(key)
+
+    if (params) {
+        Object.keys(params).forEach(k => {
+            const val = params[k]
+            message = message.replace(new RegExp(`\\{${k}\\}`, 'g'), String(val))
+        })
+    }
+
+    return message
+}
+
 export default i18n

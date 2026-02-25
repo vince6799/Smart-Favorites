@@ -195,6 +195,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { t as tGlobal } from '@/i18n'
 import { ElMessage, ElMessageBox, ElConfigProvider } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useBookmarkStore } from '@/stores/bookmark'
@@ -234,7 +235,9 @@ import { searchBookmarks } from '@/services/search'
 import { getFaviconUrl } from '@/utils/favicon'
 import type { Bookmark, Category } from '@/types'
 
-const { t } = useI18n()
+const i18n = useI18n()
+// We use the custom t from @/i18n for manual interpolation support
+const t = tGlobal
 
 const bookmarkStore = useBookmarkStore()
 const categoryStore = useCategoryStore()
@@ -442,14 +445,17 @@ const handleImportExport = async (command: string) => {
     switch (command) {
       case 'import-browser':
         const result = await importFromBrowser()
-        ElMessage.success(t('importExport.importSuccess', [result.categories, result.bookmarks]))
+        ElMessage.success(t('importExport.importSuccess', { 
+          catCount: result.categories, 
+          bmCount: result.bookmarks 
+        }))
         await bookmarkStore.loadBookmarks()
         await categoryStore.loadCategories()
         break
 
       case 'export-browser':
         const count = await exportToBrowser()
-        ElMessage.success(t('importExport.exportSuccess', [count]))
+        ElMessage.success(t('importExport.exportSuccess', { count }))
         break
 
       case 'export-json':
@@ -486,8 +492,11 @@ const handleImportExport = async (command: string) => {
             reader.onload = async (event) => {
               try {
                 const jsonStr = event.target?.result as string
-                await storageService.importFromJSON(jsonStr)
-                ElMessage.success(t('importExport.importJsonSuccess'))
+                const result = await storageService.importFromJSON(jsonStr)
+                ElMessage.success(t('importExport.importSuccess', { 
+                  catCount: result.categories, 
+                  bmCount: result.bookmarks 
+                }))
                 await bookmarkStore.loadBookmarks()
                 await categoryStore.loadCategories()
               } catch (error) {

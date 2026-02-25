@@ -63,12 +63,14 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { t as tGlobal } from '@/i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Delete } from '@element-plus/icons-vue'
 import type { Tag } from '@/types'
 import { storageService } from '@/services/storage'
 
-const { t } = useI18n()
+const i18n = useI18n()
+const t = tGlobal
 
 interface Props {
   modelValue: boolean

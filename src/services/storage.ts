@@ -601,21 +601,99 @@ export class StorageService {
     /**
      * 从JSON导入数据
      */
-    async importFromJSON(jsonStr: string): Promise<void> {
+    async importFromJSON(jsonStr: string): Promise<{ categories: number, bookmarks: number }> {
         try {
             const importData = JSON.parse(jsonStr)
-            const data = await this.getData()
-
-            // 合并数据（这里简单追加，实际可能需要处理ID冲突）
-            data.categories.push(...importData.data.categories)
-            data.bookmarks.push(...importData.data.bookmarks)
-            data.tags.push(...importData.data.tags)
-
-            await this.setData(data)
+            if (!importData.data) {
+                throw new Error('Invalid JSON format')
+            }
+            return await this.mergeData(importData.data)
         } catch (error) {
             console.error('导入失败:', error)
             throw new Error('JSON格式不正确')
         }
+    }
+
+    /**
+     * 合并外部数据到当前存储
+     * 处理分类层级映射和书签去重
+     */
+    async mergeData(incoming: { categories?: Category[], bookmarks?: Bookmark[], tags?: Tag[] }): Promise<{ categories: number, bookmarks: number }> {
+        const data = await this.getData()
+        const idMap: Record<string, string> = {} // incomingId -> existing/newId
+        let addedCategories = 0
+        let addedBookmarks = 0
+
+        // 1. 处理分类
+        if (incoming.categories) {
+            // 确保按层级关系排序（父分类在前），或者多次遍历
+            // 这里假设输入数据基本有序，或独立处理
+            idMap['default'] = 'default'
+
+            // 首先识别已存在的 ID 或同名冲突
+            for (const incomingCat of incoming.categories) {
+                const mappedParentId = incomingCat.parentId ? idMap[incomingCat.parentId] || incomingCat.parentId : null
+
+                // 查找是否存在同名同父级的分类
+                const existing = data.categories.find(c =>
+                    c.name === incomingCat.name &&
+                    c.parentId === mappedParentId
+                )
+
+                if (existing) {
+                    idMap[incomingCat.id] = existing.id
+                } else {
+                    const newId = generateId()
+                    idMap[incomingCat.id] = newId
+                    data.categories.push({
+                        ...incomingCat,
+                        id: newId,
+                        parentId: mappedParentId,
+                        updatedAt: Date.now()
+                    })
+                    addedCategories++
+                }
+            }
+        }
+
+        // 2. 处理书签
+        if (incoming.bookmarks) {
+            for (const incomingBM of incoming.bookmarks) {
+                const mappedCategoryId = incomingBM.categoryId ? idMap[incomingBM.categoryId] || incomingBM.categoryId : 'default'
+
+                // 查找同一分类下是否存在相同 URL 的书签
+                const existing = data.bookmarks.find(b =>
+                    b.url === incomingBM.url &&
+                    b.categoryId === mappedCategoryId
+                )
+
+                if (!existing) {
+                    const newBookmark: Bookmark = {
+                        ...incomingBM,
+                        id: generateId(),
+                        categoryId: mappedCategoryId,
+                        updatedAt: Date.now(),
+                        visitCount: incomingBM.visitCount || 0,
+                        lastVisit: incomingBM.lastVisit || null
+                    }
+                    data.bookmarks.push(newBookmark)
+                    addedBookmarks++
+
+                    // 确保标签存在
+                    if (newBookmark.tags && newBookmark.tags.length > 0) {
+                        this.ensureTagsExist(data, newBookmark.tags)
+                    }
+                }
+            }
+        }
+
+        // 3. 处理标签 (如果 JSON 包含独立标签定义)
+        if (incoming.tags) {
+            this.ensureTagsExist(data, incoming.tags.map(t => t.name))
+        }
+
+        await this.setData(data)
+        return { categories: addedCategories, bookmarks: addedBookmarks }
     }
 
     /**
