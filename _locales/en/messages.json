@@ -1,0 +1,64 @@
+{
+    "appName": {
+        "message": "Smart Favorites",
+        "description": "The name of the extension"
+    },
+    "appDesc": {
+        "message": "A powerful bookmark manager with multi-level categories, tags, search, and import/export support.",
+        "description": "The description of the extension"
+    },
+    "openApp": {
+        "message": "Open Favorites",
+        "description": "Description for the execute_action command"
+    },
+    "quickSearch": {
+        "message": "Quick Search",
+        "description": "Description for the quick_search command"
+    },
+    "saveToBookmarks": {
+        "message": "Save to My Favorites",
+        "description": "Main context menu item"
+    },
+    "saveToDefault": {
+        "message": "Save to Default Category",
+        "description": "Menu item to save to default category"
+    },
+    "saveWithCategory": {
+        "message": "Select Category...",
+        "description": "Menu item to choose a category"
+    },
+    "alreadyBookmarked": {
+        "message": "Already Bookmarked",
+        "description": "Notification title"
+    },
+    "existsIn": {
+        "message": "Already exists in category: $CATEGORY_NAME$",
+        "description": "Notification message when bookmark exists",
+        "placeholders": {
+            "category_name": {
+                "content": "$1"
+            }
+        }
+    },
+    "unknownCategory": {
+        "message": "Unknown",
+        "description": "Fallback for unknown category name"
+    },
+    "saveSuccess": {
+        "message": "Saved",
+        "description": "Notification title for success"
+    },
+    "saveMessage": {
+        "message": "Saved \"$TITLE$\" to default category",
+        "description": "Notification message for success",
+        "placeholders": {
+            "title": {
+                "content": "$1"
+            }
+        }
+    },
+    "saveFailed": {
+        "message": "Save Failed",
+        "description": "Notification title for failure"
+    }
+}

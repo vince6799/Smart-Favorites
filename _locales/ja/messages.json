@@ -1,0 +1,55 @@
+{
+    "appName": {
+        "message": "スマートブックマーク",
+        "description": "拡張機能の名前"
+    },
+    "appDesc": {
+        "message": "マルチレベルのカテゴリ、タグ、検索、インポート/エクスポートをサポートする強力なブックマーク管理ツール。",
+        "description": "拡張機能の説明"
+    },
+    "openApp": {
+        "message": "お気に入りを開く",
+        "description": "拡張機能を開くコマンドの説明"
+    },
+    "quickSearch": {
+        "message": "クイック検索",
+        "description": "クイック検索コマンドの説明"
+    },
+    "saveToBookmarks": {
+        "message": "お気に入りに保存"
+    },
+    "saveToDefault": {
+        "message": "默认カテゴリに保存"
+    },
+    "saveWithCategory": {
+        "message": "カテゴリを選択..."
+    },
+    "alreadyBookmarked": {
+        "message": "このURLはすでに保存されています"
+    },
+    "existsIn": {
+        "message": "「$CATEGORY_NAME$」カテゴリにすでに存在します",
+        "placeholders": {
+            "category_name": {
+                "content": "$1"
+            }
+        }
+    },
+    "unknownCategory": {
+        "message": "不明なカテゴリ"
+    },
+    "saveSuccess": {
+        "message": "保存完了"
+    },
+    "saveMessage": {
+        "message": "「$TITLE$」をデフォルトカテゴリに保存しました",
+        "placeholders": {
+            "title": {
+                "content": "$1"
+            }
+        }
+    },
+    "saveFailed": {
+        "message": "保存失敗"
+    }
+}
