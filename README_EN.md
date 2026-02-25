@@ -47,7 +47,7 @@ Smart Favorites is a powerful browser extension designed to enhance bookmark man
    npm run build:extension
    ```
 
-4. **Build Web Demo** (For GitHub Pages)
+4. **Build Showcase Site** (For GitHub Pages)
    ```bash
    npm run build:web
    ```
@@ -80,9 +80,12 @@ src/
 ├── i18n/            # Locales (EN, ZH, JA)
 ├── services/        # Core Services (Storage, Supabase, Metadata)
 ├── stores/          # Pinia Stores (Bookmark, Category, Settings)
-├── utils/           # Utilities (Chrome API Mocks, etc.)
+├── utils/           # Utilities
 ├── manifest.json    # Extension Manifest
-└── index.html       # GitHub Pages Landing Page
+├── index.html       # GitHub Pages Landing Page (ZH)
+├── index_en.html    # GitHub Pages Landing Page (EN)
+├── index_ja.html    # GitHub Pages Landing Page (JA)
+└── scripts/         # Build Scripts (build-showcase.js)
 ```
 
 ## 📄 License

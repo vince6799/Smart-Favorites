@@ -47,7 +47,7 @@
    npm run build:extension
    ```
 
-4. **打包 Web 演示版** (用于 GitHub Pages)
+4. **构建展示站点** (用于 GitHub Pages)
    ```bash
    npm run build:web
    ```
@@ -80,9 +80,12 @@ src/
 ├── i18n/            # 国际化语言包 (EN, ZH, JA)
 ├── services/        # 核心服务 (Storage, Supabase, Metadata)
 ├── stores/          # 全局状态管理 (书签, 分类, 设置)
-├── utils/           # 工具函数 (Chrome API 模拟器等)
+├── utils/           # 工具函数
 ├── manifest.json    # 插件清单文件
-└── index.html       # GitHub Pages 落地页
+├── index.html       # GitHub Pages 落地页 (中)
+├── index_en.html    # GitHub Pages 落地页 (英)
+├── index_ja.html    # GitHub Pages 落地页 (日)
+└── scripts/         # 构建脚本 (build-showcase.js)
 ```
 
 ## 📄 许可证
