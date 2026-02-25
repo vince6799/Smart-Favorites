@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vue-tsc && npm run build:extension",
     "build:extension": "cross-env VITE_BUILD_TARGET=extension vite build",
-    "build:web": "vite build",
+    "build:web": "node scripts/build-showcase.js",
     "preview": "vite preview"
   },
   "dependencies": {

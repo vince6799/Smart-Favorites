@@ -1,4 +1,3 @@
-import '@/utils/chrome-mocks'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'

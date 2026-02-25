@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能收藏夹 - 云端同步与版本管理的强大书签助手</title>
+    <title>Smart Favorites - クラウド同期とバージョン管理を備えた強力なブックマーク・アシスタント</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
     <style>
         :root {
@@ -277,66 +277,67 @@
 <body>
     <div class="container">
         <nav>
-            <a href="./index.html" class="active">简体中文</a>
+            <a href="./index.html">简体中文</a>
             <a href="./index_en.html">English</a>
-            <a href="./index_ja.html">日本語</a>
+            <a href="./index_ja.html" class="active">日本語</a>
         </nav>
         <header>
             <div class="hero-badge">Smart Favorites v2.0.0</div>
-            <h1>让书签管理更聪明</h1>
-            <p class="hero-desc">一款专为整理控制欲设计的浏览器扩展。支持无限级分类、版本化云端备份、多端元数据追踪，让您的知识沉淀永不丢失。</p>
+            <h1>ブックマーク管理を、よりスマートに</h1>
+            <p class="hero-desc">整理整頓を極めたい方のためのブラウザ拡張機能。無制限のカテゴリ、バージョン管理されたクラウドバックアップ、デバイス間のメタデータ追跡により、あなたの知識を二度と失わせません。
+            </p>
             <img src="./hero-banner.png" alt="Smart Favorites Interface" class="hero-image">
             <div class="cta">
                 <a href="https://chromewebstore.google.com/detail/smart-favorites/igpenlimhjaeobfjmljakadodcppfala"
-                    class="btn btn-primary" target="_blank">立即在 Chrome 商店下载</a>
-                <a href="https://github.com/vince6799/Smart-Favorites" class="btn btn-outline"
-                    target="_blank">查看开源代码</a>
+                    class="btn btn-primary" target="_blank">Chrome ウェブストアでダウンロード</a>
+                <a href="https://github.com/vince6799/Smart-Favorites" class="btn btn-outline" target="_blank">GitHub
+                    でソースを見る</a>
             </div>
         </header>
 
-        <h2 class="section-title">核心功能一览</h2>
+        <h2 class="section-title">主な機能</h2>
         <div class="grid">
             <div class="feature-card">
                 <div class="icon-box">📁</div>
-                <h3>无限级分类</h3>
-                <p>打破传统收藏夹的一级目录限制，支持无限层级的文件夹嵌套。自由构建您的知识图谱。</p>
+                <h3>無制限のカテゴリ</h3>
+                <p>フォルダ階層の制限から解放。無限にネスト可能なカテゴリで、あなただけのナレッジグラフを構築しましょう。</p>
             </div>
             <div class="feature-card">
                 <div class="icon-box">🏷️</div>
-                <h3>智能标签</h3>
-                <p>除了目录，还有标签。支持给书签打上多个标签，实现跨目录的极速筛选与归档。</p>
+                <h3>スマートタグ</h3>
+                <p>フォルダだけではありません。複数のタグを付けて、カテゴリを超えた瞬時のフィルタリングとアーカイブを実現します。</p>
             </div>
             <div class="feature-card">
                 <div class="icon-box">☁️</div>
-                <h3>Supabase 云同步</h3>
-                <p>基于 Supabase 的版本化同步方案。每次同步都是独立版本，支持从最近 100 个版本中随时还原。</p>
+                <h3>Supabase 同期</h3>
+                <p>Supabase によるバージョン管理同期。すべての同期がスナップショットとして保存。最大 100 個の履歴からいつでも復元可能です。</p>
             </div>
             <div class="feature-card">
                 <div class="icon-box">🔍</div>
-                <h3>全文模糊搜索</h3>
-                <p>集成 Fuse.js 引擎。支持标题、URL、描述、分类及标签的毫秒级全文模糊匹配。</p>
+                <h3>全文曖昧検索</h3>
+                <p>Fuse.js エンジン搭載。タイトル、URL、説明、カテゴリ、タグを対象にミリ秒単位で曖昧検索が可能です。</p>
             </div>
             <div class="feature-card">
                 <div class="icon-box">🛡️</div>
-                <h3>自动备份策略</h3>
-                <p>本地自动备份与云端版本清理策略并存。支持自定义保留版本数，让存储更高效。</p>
+                <h3>バックアップ戦略</h3>
+                <p>ローカル自動バックアップとクラウド履歴管理。保存数をカスタマイズし、ストレージ効率を最大化します。</p>
             </div>
             <div class="feature-card">
                 <div class="icon-box">🌐</div>
-                <h3>多端设备追踪</h3>
-                <p>自动识别备份来源的浏览器（Chrome / Edge）及操作系统（Mac / Win），多端管理清晰明了。</p>
+                <h3>デバイス追跡</h3>
+                <p>ブラウザ (Chrome/Edge) や OS (Mac/Win) を自動識別。マルチデバイス環境でもバックアップ元を迷いません。</p>
             </div>
         </div>
 
         <div class="details-section">
             <div class="detail-row">
                 <div class="detail-content">
-                    <h2>📁 极致的组织体验</h2>
+                    <h2>📁 究極の整理体験</h2>
                     <ul>
-                        <li>支持文件夹无限级嵌套。</li>
-                        <li>列表、网格、卡片三种视图随心切换。</li>
-                        <li>支持按标题、时间、访问频率及最后访问时间多维排序。</li>
-                        <li>Favicon 图标自动抓取，界面生动鲜活。</li>
+                        <li>無限のフォルダ階層。</li>
+                        <li>リスト、グリッド、カードの 3 つの表示モード。</li>
+                        <li>タイトル、日時、訪問数、最終アクセスでの並べ替え。</li>
+                        <li>Favicon 自動取得で、視覚的に分かりやすい管理。</li>
                     </ul>
                 </div>
                 <div class="detail-image-stub">
@@ -347,12 +348,12 @@
 
             <div class="detail-row">
                 <div class="detail-content">
-                    <h2>🔄 版本化数据保障</h2>
+                    <h2>🔄 安心のデータ保護</h2>
                     <ul>
-                        <li>不再是覆盖式同步，而是全量快照。</li>
-                        <li>查看同步历史，对比版本时间及设备标识。</li>
-                        <li>一键还原，支持跨设备无缝迁移。</li>
-                        <li>支持自定义云端存储保留上线，保持数据库整洁。</li>
+                        <li>上書きではなく、フルスナップショット保存。</li>
+                        <li>デバイス識別情報付きの詳細な履歴ログ。</li>
+                        <li>ワンクリック復元で、デバイス移行もスムーズに。</li>
+                        <li>クラウド保存数のカスタマイズでデータベースを軽量に維持。</li>
                     </ul>
                 </div>
                 <div class="detail-image-stub">
@@ -363,12 +364,12 @@
 
             <div class="detail-row">
                 <div class="detail-content">
-                    <h2>⌨️ 专为效率而生</h2>
+                    <h2>⌨️ 効率を追求した設計</h2>
                     <ul>
-                        <li>全局快捷键呼出搜索，手不离键盘即可直达网页。</li>
-                        <li>右键菜单快速一键保存，支持预设保存位置。</li>
-                        <li>自动同步浏览器书签，支持 JSON 格式灵活导入导出。</li>
-                        <li>完整支持中、英、日三语，自动适配语言环境。</li>
+                        <li>ショートカットキーで検索窓を即起動、キーボードだけで完結。</li>
+                        <li>右クリックメニューからターゲットフォルダへ一撃保存。</li>
+                        <li>ブラウザ標準ブックマークとの同期、JSON でのインポート・エクスポート。</li>
+                        <li>日本語、英語、中国語をネイティブサポート。</li>
                     </ul>
                 </div>
                 <div class="detail-image-stub">
@@ -379,10 +380,11 @@
         </div>
 
         <footer>
-            <p>&copy; 2026 Smart Favorites. 开源于 GitHub.</p>
+            <p>&copy; 2026 Smart Favorites. GitHub にてオープンソース公開中。</p>
             <p style="margin-top: 1rem;">
                 <a href="https://chromewebstore.google.com/detail/smart-favorites/igpenlimhjaeobfjmljakadodcppfala"
-                    style="color: var(--primary); font-weight: 600; text-decoration: none;">立即前往 Chrome 商店下载 &rarr;</a>
+                    style="color: var(--primary); font-weight: 600; text-decoration: none;">Chrome ウェブストアで今すぐダウンロード
+                    &rarr;</a>
             </p>
         </footer>
     </div>
