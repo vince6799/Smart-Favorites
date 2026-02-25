@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能收藏夹 - 强大的浏览器收藏管理工具</title>
+    <style>
+        :root {
+            --primary-color: #409eff;
+            --text-color: #2c3e50;
+            --bg-color: #f5f7fa;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #409eff 0%, #36d1dc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            color: #5e6d82;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(64, 158, 255, 0.1);
+        }
+
+        .features {
+            margin-top: 4rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-item h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>智能收藏夹</h1>
+        <p>一个简单、美观且功能强大的浏览器收藏夹增强插件。支持多级分类、标签管理、云端同步及自动备份。</p>
+
+        <div class="actions">
+            <!-- Updated path to point to the built popup -->
+            <a href="src/popup/index.html" class="btn btn-primary">立即体验 (Web Demo)</a>
+            <a href="https://github.com/vince6799/Smart-Favorites" class="btn btn-outline" target="_blank">查看开源代码</a>
+        </div>
+
+        <div class="features">
+            <div class="feature-item">
+                <h3>多级分类</h3>
+                <p>自由创建和组织书签目录，清晰明了。</p>
+            </div>
+            <div class="feature-item">
+                <h3>云端同步</h3>
+                <p>基于 Supabase 的版本化备份，数据永不丢失。</p>
+            </div>
+            <div class="feature-item">
+                <h3>快速搜索</h3>
+                <p>全局快捷键呼出，毫秒级模糊匹配。</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

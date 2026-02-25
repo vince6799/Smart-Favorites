@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc && vite build",
+    "build": "vue-tsc && npm run build:extension",
+    "build:extension": "cross-env VITE_BUILD_TARGET=extension vite build",
+    "build:web": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -23,6 +25,7 @@
     "@types/chrome": "^0.0.260",
     "@types/node": "^20.11.19",
     "@vitejs/plugin-vue": "^5.0.4",
+    "cross-env": "^10.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-web-extension": "^4.1.1",
